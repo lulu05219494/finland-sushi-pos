@@ -24,10 +24,12 @@
   --warn-soft:#f8edd3;
   --crit:#cf5c4d;
   --crit-soft:#fae1dd;
-  --sidebar-bg:#0b2a30;
-  --sidebar-ink:#cdeae6;
-  --sidebar-ink-dim:#6f9a97;
-  --sidebar-active:#113c40;
+  --sidebar-bg:#c5e7ec;
+  --sidebar-ink:#153a40;
+  --sidebar-ink-dim:#4c7d83;
+  --sidebar-active:#ffffff;
+  --sidebar-hover: rgba(10,40,45,.07);
+  --sidebar-border: rgba(10,40,45,.10);
   --shadow: 0 1px 2px rgba(10,45,45,.07), 0 6px 20px -8px rgba(10,45,45,.18);
   --radius:8px;
   --font-display:'Manrope',ui-sans-serif,system-ui,sans-serif;
@@ -59,6 +61,8 @@
     --sidebar-ink:#bfe3df;
     --sidebar-ink-dim:#5c827e;
     --sidebar-active:#0d2b2e;
+    --sidebar-hover: rgba(255,255,255,.06);
+    --sidebar-border: rgba(255,255,255,.08);
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -10px rgba(0,0,0,.5);
   }
 }
@@ -86,6 +90,8 @@
   --sidebar-ink:#bfe3df;
   --sidebar-ink-dim:#5c827e;
   --sidebar-active:#0d2b2e;
+  --sidebar-hover: rgba(255,255,255,.06);
+  --sidebar-border: rgba(255,255,255,.08);
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -10px rgba(0,0,0,.5);
 }
 
@@ -127,11 +133,11 @@ button{font-family:inherit;}
   display:flex;align-items:center;gap:10px;
   padding:6px 8px 18px;
   margin-bottom:6px;
-  border-bottom:1px solid rgba(255,255,255,.08);
+  border-bottom:1px solid var(--sidebar-border);
 }
 .brand-mark{width:34px;height:34px;flex:none;}
 .brand-text{display:flex;flex-direction:column;line-height:1.2;}
-.brand-text b{font-family:var(--font-display);font-weight:800;font-size:15.5px;color:#fff;letter-spacing:.2px;}
+.brand-text b{font-family:var(--font-display);font-weight:800;font-size:15.5px;color:var(--sidebar-ink);letter-spacing:.2px;}
 .brand-text span{font-size:10.5px;color:var(--sidebar-ink-dim);letter-spacing:.4px;text-transform:uppercase;}
 
 .nav-group{margin-top:14px;}
@@ -149,8 +155,8 @@ button{font-family:inherit;}
   transition:background .12s ease;
 }
 .nav-item svg{width:17px;height:17px;flex:none;opacity:.85;}
-.nav-item:hover{background:rgba(255,255,255,.05);}
-.nav-item.active{background:var(--sidebar-active);color:#fff;}
+.nav-item:hover{background:var(--sidebar-hover);}
+.nav-item.active{background:var(--sidebar-active);color:var(--accent-strong);}
 .nav-item.active::before{
   content:"";position:absolute;left:-12px;top:8px;bottom:8px;width:3px;
   background:var(--accent-strong);border-radius:0 3px 3px 0;
