@@ -1,0 +1,2115 @@
+<title>Lumo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+/* ============ Tokens ============ */
+:root{
+  --paper:#e9f6f5;
+  --paper-raised:#ffffff;
+  --paper-sunken:#dbf0ed;
+  --ink:#17363a;
+  --ink-soft:#4c7075;
+  --ink-faint:#84a6a8;
+  --border:#c9e8e3;
+  --border-strong:#a9d6d0;
+  --accent:#1fb0a1;
+  --accent-strong:#128d80;
+  --accent-soft:#d1f2ec;
+  --salmon:#4fa6df;
+  --salmon-soft:#dcedfa;
+  --good:#2f9e6f;
+  --good-soft:#dcf3e6;
+  --warn:#c1922c;
+  --warn-soft:#f8edd3;
+  --crit:#cf5c4d;
+  --crit-soft:#fae1dd;
+  --sidebar-bg:#0b2a30;
+  --sidebar-ink:#cdeae6;
+  --sidebar-ink-dim:#6f9a97;
+  --sidebar-active:#113c40;
+  --shadow: 0 1px 2px rgba(10,45,45,.07), 0 6px 20px -8px rgba(10,45,45,.18);
+  --radius:8px;
+  --font-display:'Manrope',ui-sans-serif,system-ui,sans-serif;
+  --font-body:'Public Sans',ui-sans-serif,system-ui,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0b2024;
+    --paper-raised:#122e32;
+    --paper-sunken:#0e262a;
+    --ink:#e2f4f1;
+    --ink-soft:#a2c9c4;
+    --ink-faint:#6d938f;
+    --border:#1f4448;
+    --border-strong:#2c5559;
+    --accent:#4fd3bf;
+    --accent-strong:#82e2d3;
+    --accent-soft:#153a3a;
+    --salmon:#6fb6ec;
+    --salmon-soft:#132c3a;
+    --good:#5cc98f;
+    --good-soft:#123527;
+    --warn:#e0b45a;
+    --warn-soft:#3a2e15;
+    --crit:#e2796a;
+    --crit-soft:#3a1f1b;
+    --sidebar-bg:#071a1d;
+    --sidebar-ink:#bfe3df;
+    --sidebar-ink-dim:#5c827e;
+    --sidebar-active:#0d2b2e;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -10px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0b2024;
+  --paper-raised:#122e32;
+  --paper-sunken:#0e262a;
+  --ink:#e2f4f1;
+  --ink-soft:#a2c9c4;
+  --ink-faint:#6d938f;
+  --border:#1f4448;
+  --border-strong:#2c5559;
+  --accent:#4fd3bf;
+  --accent-strong:#82e2d3;
+  --accent-soft:#153a3a;
+  --salmon:#6fb6ec;
+  --salmon-soft:#132c3a;
+  --good:#5cc98f;
+  --good-soft:#123527;
+  --warn:#e0b45a;
+  --warn-soft:#3a2e15;
+  --crit:#e2796a;
+  --crit-soft:#3a1f1b;
+  --sidebar-bg:#071a1d;
+  --sidebar-ink:#bfe3df;
+  --sidebar-ink-dim:#5c827e;
+  --sidebar-active:#0d2b2e;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -10px rgba(0,0,0,.5);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:14.5px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:var(--font-display);text-wrap:balance;margin:0;color:var(--ink);}
+.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
+a{color:inherit;}
+button{font-family:inherit;}
+::selection{background:var(--accent-soft);}
+
+/* ============ App shell ============ */
+.app{
+  display:grid;
+  grid-template-columns:242px 1fr;
+  grid-template-rows:58px 1fr;
+  grid-template-areas:"sidebar topbar" "sidebar main";
+  min-height:100vh;
+}
+.sidebar{
+  grid-area:sidebar;
+  background:var(--sidebar-bg);
+  color:var(--sidebar-ink);
+  display:flex;
+  flex-direction:column;
+  padding:16px 12px 20px;
+  gap:4px;
+  overflow-y:auto;
+}
+.brand{
+  display:flex;align-items:center;gap:10px;
+  padding:6px 8px 18px;
+  margin-bottom:6px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.brand-mark{width:34px;height:34px;flex:none;}
+.brand-text{display:flex;flex-direction:column;line-height:1.2;}
+.brand-text b{font-family:var(--font-display);font-weight:800;font-size:15.5px;color:#fff;letter-spacing:.2px;}
+.brand-text span{font-size:10.5px;color:var(--sidebar-ink-dim);letter-spacing:.4px;text-transform:uppercase;}
+
+.nav-group{margin-top:14px;}
+.nav-group:first-of-type{margin-top:4px;}
+.nav-label{
+  font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--sidebar-ink-dim);padding:0 10px;margin-bottom:6px;font-weight:600;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;border-radius:7px;
+  font-size:13.6px;font-weight:500;color:var(--sidebar-ink);
+  cursor:pointer;border:1px solid transparent;
+  position:relative;
+  transition:background .12s ease;
+}
+.nav-item svg{width:17px;height:17px;flex:none;opacity:.85;}
+.nav-item:hover{background:rgba(255,255,255,.05);}
+.nav-item.active{background:var(--sidebar-active);color:#fff;}
+.nav-item.active::before{
+  content:"";position:absolute;left:-12px;top:8px;bottom:8px;width:3px;
+  background:var(--accent-strong);border-radius:0 3px 3px 0;
+}
+.nav-item .badge{
+  margin-left:auto;font-family:var(--font-mono);font-size:10.5px;
+  background:var(--crit);color:#fff;border-radius:20px;padding:1px 6px;
+  min-width:16px;text-align:center;
+}
+
+.topbar{
+  grid-area:topbar;
+  background:var(--paper-raised);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 22px;gap:16px;
+  position:sticky;top:0;z-index:20;
+}
+.topbar h1{font-size:16.5px;font-weight:700;}
+.topbar .sub{color:var(--ink-faint);font-size:12.5px;margin-left:2px;}
+.topbar-spacer{flex:1;}
+.topbar-clock{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft);}
+.theme-toggle{
+  border:1px solid var(--border-strong);background:var(--paper);
+  border-radius:7px;padding:6px 10px;font-size:12px;cursor:pointer;color:var(--ink-soft);
+}
+.theme-toggle:hover{border-color:var(--accent);color:var(--accent);}
+
+.main{
+  grid-area:main;
+  padding:22px 26px 60px;
+  overflow-y:auto;
+  min-width:0;
+}
+.view{display:none;flex-direction:column;gap:20px;}
+.view.active{display:flex;}
+
+/* ============ Generic pieces ============ */
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.page-head h2{font-size:22px;font-weight:800;}
+.page-head p{margin:4px 0 0;color:var(--ink-soft);font-size:13px;max-width:60ch;}
+
+.btn{
+  display:inline-flex;align-items:center;gap:7px;
+  border:1px solid var(--border-strong);background:var(--paper-raised);
+  color:var(--ink);padding:8px 14px;border-radius:7px;
+  font-size:13px;font-weight:600;cursor:pointer;
+  transition:border-color .12s ease, background .12s ease;
+}
+.btn:hover{border-color:var(--accent);}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn.primary:hover{background:var(--accent-strong);border-color:var(--accent-strong);}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--ink-soft);}
+.btn.ghost:hover{color:var(--accent);background:var(--accent-soft);}
+.btn.danger{color:var(--crit);}
+.btn.danger:hover{border-color:var(--crit);background:var(--crit-soft);}
+.btn.sm{padding:5px 10px;font-size:12px;}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+.btn svg{width:15px;height:15px;}
+
+.card{
+  background:var(--paper-raised);border:1px solid var(--border);
+  border-radius:var(--radius);box-shadow:var(--shadow);
+}
+.card-pad{padding:18px 20px;}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;}
+.kpi{
+  background:var(--paper-raised);border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px 18px;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;gap:6px;
+}
+.kpi .label{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);font-weight:600;}
+.kpi .value{font-family:var(--font-mono);font-size:24px;font-weight:600;letter-spacing:-.02em;}
+.kpi .delta{font-size:12px;color:var(--ink-soft);}
+.kpi .delta.up{color:var(--good);}
+.kpi .delta.down{color:var(--crit);}
+
+.grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media (max-width:980px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+.section-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
+.section-title h3{font-size:14.5px;font-weight:700;}
+.section-title .hint{font-size:11.5px;color:var(--ink-faint);}
+
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{
+  text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--ink-faint);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--paper-sunken);}
+.table-wrap{overflow-x:auto;border-radius:var(--radius);}
+.table-scroll{max-height:420px;overflow-y:auto;}
+
+.pill{
+  display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+  padding:3px 9px;border-radius:20px;white-space:nowrap;
+}
+.pill.ok{background:var(--good-soft);color:var(--good);}
+.pill.warn{background:var(--warn-soft);color:var(--warn);}
+.pill.crit{background:var(--crit-soft);color:var(--crit);}
+.pill.neutral{background:var(--paper-sunken);color:var(--ink-soft);}
+.pill.accent{background:var(--accent-soft);color:var(--accent-strong);}
+.pill.salmon{background:var(--salmon-soft);color:var(--salmon);}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+.bars{display:flex;flex-direction:column;gap:10px;}
+.bar-row{display:grid;grid-template-columns:120px 1fr 64px;align-items:center;gap:10px;font-size:12.5px;}
+.bar-row .name{color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bar-track{background:var(--paper-sunken);border-radius:5px;height:9px;overflow:hidden;}
+.bar-fill{height:100%;background:var(--accent);border-radius:5px;}
+.bar-row .val{font-family:var(--font-mono);text-align:right;color:var(--ink);}
+
+.hourbars{display:flex;align-items:flex-end;gap:3px;height:130px;padding-top:6px;}
+.hourbar{flex:1;background:var(--accent-soft);border-radius:3px 3px 0 0;position:relative;min-height:2px;}
+.hourbar.peak{background:var(--accent);}
+.hourbar span{
+  position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);
+  font-size:9.5px;font-family:var(--font-mono);color:var(--ink-faint);white-space:nowrap;
+}
+.hourlabels{display:flex;gap:3px;}
+.hourlabels div{flex:1;text-align:center;font-size:9px;color:var(--ink-faint);font-family:var(--font-mono);}
+
+/* ============ POS ============ */
+.pos-layout{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start;}
+@media (max-width:1050px){.pos-layout{grid-template-columns:1fr;}}
+.pos-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.pos-tab{
+  border:1px solid var(--border-strong);background:var(--paper-raised);padding:7px 13px;
+  border-radius:20px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--ink-soft);
+}
+.pos-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;}
+.product-tile{
+  background:var(--paper-raised);border:1px solid var(--border);border-radius:var(--radius);
+  padding:12px;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:6px;
+  transition:border-color .12s ease, transform .06s ease;
+}
+.product-tile:hover{border-color:var(--accent);}
+.product-tile:active{transform:scale(.98);}
+.product-tile .code{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-faint);}
+.product-tile .pname{font-size:13px;font-weight:700;line-height:1.25;min-height:2.4em;}
+.product-tile .pprice{font-family:var(--font-mono);font-size:13.5px;color:var(--accent-strong);font-weight:600;}
+
+.cart-panel{position:sticky;top:74px;display:flex;flex-direction:column;gap:12px;}
+.cart-list{display:flex;flex-direction:column;gap:0;max-height:300px;overflow-y:auto;}
+.cart-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);}
+.cart-row:last-child{border-bottom:none;}
+.cart-row .cname{flex:1;font-size:12.8px;font-weight:600;}
+.cart-row .cmeta{font-size:11px;color:var(--ink-faint);font-family:var(--font-mono);}
+.qty-ctrl{display:flex;align-items:center;gap:6px;}
+.qty-ctrl button{
+  width:20px;height:20px;border-radius:5px;border:1px solid var(--border-strong);
+  background:var(--paper);cursor:pointer;font-size:13px;line-height:1;color:var(--ink-soft);
+}
+.qty-ctrl span{font-family:var(--font-mono);font-size:12.5px;min-width:16px;text-align:center;}
+.cart-empty{color:var(--ink-faint);font-size:12.5px;text-align:center;padding:24px 0;}
+
+.totals-row{display:flex;justify-content:space-between;font-size:12.8px;color:var(--ink-soft);}
+.totals-row.grand{font-size:16.5px;font-weight:700;color:var(--ink);padding-top:8px;border-top:1px dashed var(--border-strong);}
+.totals-row .num{font-family:var(--font-mono);}
+
+.pay-methods{display:flex;gap:8px;}
+.pay-btn{
+  flex:1;border:1px solid var(--border-strong);background:var(--paper);padding:9px 4px;
+  border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--ink-soft);
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.pay-btn svg{width:16px;height:16px;}
+.pay-btn.active{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-strong);}
+
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:11.5px;font-weight:600;color:var(--ink-soft);}
+.field select,.field input,.field textarea{
+  border:1px solid var(--border-strong);background:var(--paper);color:var(--ink);
+  border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;width:100%;
+}
+.field select:focus,.field input:focus,.field textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent);}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+.toast{
+  position:fixed;bottom:22px;right:22px;background:var(--ink);color:var(--paper);
+  padding:12px 18px;border-radius:8px;font-size:13px;font-weight:600;
+  box-shadow:var(--shadow);z-index:100;display:flex;align-items:center;gap:10px;
+  transform:translateY(12px);opacity:0;transition:all .18s ease;pointer-events:none;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.err{background:var(--crit);}
+.toast .dot{width:8px;height:8px;border-radius:50%;background:var(--good);flex:none;}
+.toast.err .dot{background:#fff;}
+
+/* ============ Upload / TaxHacker ============ */
+.dropzone{
+  border:2px dashed var(--border-strong);border-radius:var(--radius);
+  background:repeating-linear-gradient(135deg, var(--paper-sunken) 0 10px, transparent 10px 20px);
+  padding:34px 20px;text-align:center;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  transition:border-color .15s ease, background .15s ease;
+}
+.dropzone:hover,.dropzone.drag{border-color:var(--accent);color:var(--accent-strong);}
+.dropzone svg{width:34px;height:34px;color:var(--ink-faint);}
+.dropzone b{font-size:14px;}
+.dropzone span{font-size:12px;color:var(--ink-faint);}
+
+.invoice-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;}
+.invoice-card{
+  background:var(--paper-raised);border:1px solid var(--border);border-radius:var(--radius);
+  padding:13px;cursor:pointer;display:flex;flex-direction:column;gap:8px;
+}
+.invoice-card:hover{border-color:var(--accent);}
+.invoice-thumb{
+  height:86px;border-radius:6px;background:var(--paper-sunken);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--ink-faint);
+  background-size:cover;background-position:center;
+}
+.invoice-thumb svg{width:26px;height:26px;}
+.invoice-card .vendor{font-size:13px;font-weight:700;}
+.invoice-card .meta{font-size:11.5px;color:var(--ink-faint);font-family:var(--font-mono);}
+.invoice-card .amt{font-family:var(--font-mono);font-size:14.5px;font-weight:600;}
+.spinner{
+  width:15px;height:15px;border-radius:50%;border:2px solid var(--accent-soft);
+  border-top-color:var(--accent);animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+@media (prefers-reduced-motion: reduce){.spinner{animation:none;}}
+
+/* ============ Modal ============ */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(10,18,15,.45);backdrop-filter:blur(1px);
+  display:none;align-items:flex-start;justify-content:center;padding:5vh 16px;z-index:200;overflow-y:auto;
+}
+.modal-backdrop.open{display:flex;}
+.modal{
+  background:var(--paper-raised);border-radius:12px;border:1px solid var(--border);
+  width:100%;max-width:560px;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;max-height:90vh;
+}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);}
+.modal-head h3{font-size:15.5px;font-weight:700;}
+.modal-close{background:none;border:none;cursor:pointer;color:var(--ink-faint);padding:4px;border-radius:6px;}
+.modal-close:hover{color:var(--ink);background:var(--paper-sunken);}
+.modal-body{padding:18px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--border);}
+
+.bom-row{display:grid;grid-template-columns:1fr 90px 32px;gap:8px;align-items:center;}
+.bom-list{display:flex;flex-direction:column;gap:8px;}
+
+.empty-state{text-align:center;padding:40px 20px;color:var(--ink-faint);}
+.empty-state svg{width:36px;height:36px;margin-bottom:10px;opacity:.6;}
+
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--ink-soft);}
+.legend span{display:flex;align-items:center;gap:6px;}
+.legend i{width:9px;height:9px;border-radius:2px;display:inline-block;}
+
+.footnote{font-size:11.5px;color:var(--ink-faint);line-height:1.6;}
+.divider{height:1px;background:var(--border);border:none;margin:2px 0;}
+.tag-list{display:flex;flex-wrap:wrap;gap:6px;}
+.tag-chip{
+  display:flex;align-items:center;gap:6px;background:var(--paper-sunken);border:1px solid var(--border);
+  border-radius:20px;padding:4px 5px 4px 12px;font-size:12px;
+}
+.tag-chip button{background:none;border:none;cursor:pointer;color:var(--ink-faint);width:18px;height:18px;border-radius:50%;}
+.tag-chip button:hover{background:var(--crit-soft);color:var(--crit);}
+
+@media (max-width:760px){
+  .app{grid-template-columns:1fr;grid-template-areas:"topbar" "main";}
+  .sidebar{display:none;}
+}
+</style>
+
+<div class="app">
+  <nav class="sidebar" id="sidebar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="19" fill="#f4efe3"/>
+        <circle cx="20" cy="20" r="19" fill="none" stroke="#16241f" stroke-width="2.4"/>
+        <circle cx="20" cy="20" r="6.5" fill="#df7757"/>
+        <circle cx="14.5" cy="14" r="1.6" fill="#fff"/>
+        <circle cx="26.5" cy="15.5" r="1.6" fill="#fff"/>
+        <circle cx="13.5" cy="26" r="1.6" fill="#fff"/>
+        <circle cx="27" cy="26.5" r="1.6" fill="#fff"/>
+        <circle cx="20" cy="30" r="1.6" fill="#fff"/>
+      </svg>
+      <div class="brand-text">
+        <b>Lumo</b>
+        <span>ERPNext × TaxHacker</span>
+      </div>
+    </div>
+
+    <div class="nav-item active" data-view="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+      概览
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">销售 · Sales</div>
+      <div class="nav-item" data-view="pos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="6" width="19" height="13" rx="2"/><path d="M2.5 10.5h19"/><path d="M6 14.5h4"/></svg>
+        POS 收银台
+      </div>
+      <div class="nav-item" data-view="sales">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M9 12h6M9 16h6M9 8h3"/></svg>
+        销售记录
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">目录 · Catalog</div>
+      <div class="nav-item" data-view="products">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.6 12.3 12.7 20.2a2 2 0 0 1-2.8 0l-6-6a2 2 0 0 1 0-2.8L11.8 3.3a2 2 0 0 1 1.5-.6l5.4.1a2 2 0 0 1 2 2l.1 5.4a2 2 0 0 1-.2 2.1Z"/><circle cx="15.5" cy="8.5" r="1.4"/></svg>
+        寿司产品 &amp; BOM
+      </div>
+      <div class="nav-item" data-view="inventory">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7.5 12 3l9 4.5-9 4.5-9-4.5Z"/><path d="M3 7.5V16l9 4.5 9-4.5V7.5"/><path d="M12 12v8.5"/></svg>
+        原材料库存
+        <span class="badge" id="navLowStockBadge" style="display:none;"></span>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">财务 · TaxHacker</div>
+      <div class="nav-item" data-view="invoices">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 2.5h8l4 4V20a1.3 1.3 0 0 1-1.3 1.3H7A1.3 1.3 0 0 1 5.7 20V3.8A1.3 1.3 0 0 1 7 2.5Z"/><path d="M9 12.5h6M9 16h6M9 9h2.5"/></svg>
+        发票 AI 识别
+        <span class="badge" id="navPendingBadge" style="display:none;"></span>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">统计 · Reports</div>
+      <div class="nav-item" data-view="reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M11 20V4M18 20v-7"/><path d="M2.5 20.5h19"/></svg>
+        报表中心
+      </div>
+    </div>
+
+    <div class="nav-group" style="margin-top:auto;">
+      <div class="nav-label">系统 · System</div>
+      <div class="nav-item" data-view="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.9 2.9l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55v.17a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.9-2.9l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H2.5a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.55-1.1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.9-2.9l.06.06a1.7 1.7 0 0 0 1.87.34H8.7a1.7 1.7 0 0 0 1-1.55V2.5a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.9 2.9l-.06.06a1.7 1.7 0 0 0-.34 1.87v.08a1.7 1.7 0 0 0 1.55 1H21.5a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.55 1Z"/></svg>
+        系统设置
+      </div>
+    </div>
+  </nav>
+
+  <header class="topbar">
+    <h1 id="topbarTitle">概览</h1>
+    <span class="sub" id="topbarSub">Lumo Sushi · Smile Deer Oy</span>
+    <div class="topbar-spacer"></div>
+    <span class="topbar-clock" id="clock">—</span>
+    <button class="theme-toggle" id="themeToggle" type="button">🌓 主题</button>
+  </header>
+
+  <main class="main" id="main">
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <section class="view" id="view-dashboard">
+      <div class="page-head">
+        <div>
+          <h2>今日经营概览</h2>
+          <p>整合 POS 刷卡/现金入账、BOM 自动扣减库存与 TaxHacker 发票识别的实时快照。</p>
+        </div>
+      </div>
+
+      <div class="kpi-grid" id="kpiGrid"></div>
+
+      <div class="grid-2">
+        <div class="card card-pad">
+          <div class="section-title"><h3>热销寿司 Top 5（今日）</h3><span class="hint">按含税营业额</span></div>
+          <div class="bars" id="topProductsBar" style="margin-top:10px;"></div>
+        </div>
+        <div class="card card-pad">
+          <div class="section-title"><h3>支付方式占比（今日）</h3><span class="hint">刷卡 / 现金 / 移动支付</span></div>
+          <div id="paymentSplit" style="margin-top:10px;"></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card card-pad">
+          <div class="section-title"><h3>原材料库存预警</h3><span class="hint">低于安全库存自动列出</span></div>
+          <div class="table-wrap" style="margin-top:10px;">
+            <table><thead><tr><th>原材料</th><th>当前库存</th><th>安全库存</th><th>状态</th></tr></thead>
+            <tbody id="lowStockTable"></tbody></table>
+          </div>
+        </div>
+        <div class="card card-pad">
+          <div class="section-title"><h3>TaxHacker 待处理发票</h3><span class="hint">AI 已提取，等待人工确认</span></div>
+          <div id="pendingInvoiceList" style="margin-top:10px;display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== POS ===================== -->
+    <section class="view" id="view-pos">
+      <div class="page-head">
+        <div>
+          <h2>POS 收银台</h2>
+          <p>选择商品加入购物车，结账后系统按 BOM 自动扣减对应原材料库存；刷卡支付将通过 Viva Terminal API 呼叫读卡终端。</p>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-end;">
+          <div id="termStatusWrap" style="display:flex;flex-direction:column;gap:5px;">
+            <label style="font-size:11.5px;font-weight:600;color:var(--ink-soft);">读卡终端</label>
+            <span class="pill" id="termStatusPill">—</span>
+          </div>
+          <div class="field" style="width:180px;">
+            <label>当前收银员</label>
+            <select id="clerkSelect"></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="pos-layout">
+        <div>
+          <div class="pos-tabs" id="posTabs"></div>
+          <div class="product-grid" id="posGrid"></div>
+        </div>
+
+        <div class="cart-panel card card-pad">
+          <div class="section-title"><h3>当前订单</h3><span class="hint" id="cartCount">0 件</span></div>
+          <div class="cart-list" id="cartList"><div class="cart-empty">购物车是空的，点击左侧商品添加</div></div>
+          <hr class="divider">
+          <div class="totals-row"><span>不含税金额</span><span class="num" id="sumExcl">0,00 €</span></div>
+          <div class="totals-row"><span>VAT (13,5%)</span><span class="num" id="sumVat">0,00 €</span></div>
+          <div class="totals-row grand"><span>合计</span><span class="num" id="sumIncl">0,00 €</span></div>
+          <div class="field">
+            <label>支付方式</label>
+            <div class="pay-methods" id="payMethods"></div>
+          </div>
+          <div id="cartWarning" style="display:none;font-size:12px;color:var(--crit);background:var(--crit-soft);padding:8px 10px;border-radius:6px;"></div>
+          <button class="btn primary" id="checkoutBtn" style="justify-content:center;padding:11px;">完成结账</button>
+          <button class="btn ghost" id="clearCartBtn" style="justify-content:center;">清空购物车</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SALES HISTORY ===================== -->
+    <section class="view" id="view-sales">
+      <div class="page-head">
+        <div><h2>销售记录</h2><p>全部 POS 交易流水，含支付方式与含税金额，可查看单据明细。</p></div>
+      </div>
+      <div class="card">
+        <div class="table-wrap table-scroll">
+          <table><thead><tr>
+            <th>单号</th><th>时间</th><th>收银员</th><th>商品</th><th>支付方式</th><th>不含税</th><th>VAT</th><th>含税总额</th><th></th>
+          </tr></thead><tbody id="salesTable"></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PRODUCTS ===================== -->
+    <section class="view" id="view-products">
+      <div class="page-head">
+        <div><h2>寿司产品 &amp; BOM</h2><p>维护售价、增值税率与用料配方（BOM）；结账时按此配方自动扣减原材料。</p></div>
+        <button class="btn primary" id="addProductBtn">+ 新建产品</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap table-scroll">
+          <table><thead><tr>
+            <th>编号</th><th>名称</th><th>分类</th><th>VAT</th><th>不含税价</th><th>含税价</th><th>BOM 用料</th><th></th>
+          </tr></thead><tbody id="productsTable"></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== INVENTORY ===================== -->
+    <section class="view" id="view-inventory">
+      <div class="page-head">
+        <div><h2>原材料库存</h2><p>随 POS 销售自动扣减；可手动登记采购入库或盘点调整。</p></div>
+      </div>
+      <div class="card">
+        <div class="table-wrap table-scroll">
+          <table><thead><tr>
+            <th>原材料</th><th>单位</th><th>当前库存</th><th>安全库存</th><th>单位成本</th><th>状态</th><th></th>
+          </tr></thead><tbody id="inventoryTable"></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== INVOICES / TAXHACKER ===================== -->
+    <section class="view" id="view-invoices">
+      <div class="page-head">
+        <div><h2>TaxHacker 发票 AI 识别</h2><p>上传购物小票或供应商发票图片，人工核对后确认入账，计入进项税额与增值税申报。</p></div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="section-title"><h3>识别后端 · Gemini API</h3><span class="pill" id="receiptApiStatusPill">未测试</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-top:10px;">
+          <div class="field" style="flex:1;min-width:220px;"><label>后端地址</label><input id="receiptApiBaseInput" type="text" placeholder="http://localhost:8000"></div>
+          <button class="btn" id="receiptApiTestBtn" type="button">测试连接</button>
+          <button class="btn primary" id="receiptApiSaveBtn" type="button">保存</button>
+        </div>
+        <p class="footnote" style="margin-top:8px;">指向自托管的 <code>lumo-backend</code>（见 README）。claude.ai Artifact 沙箱会拦截对外部地址的请求，此功能需在自托管页面中才能连通；未配置或连接失败时会自动回退为文件名解析。</p>
+      </div>
+
+      <div class="card card-pad">
+        <div class="dropzone" id="dropzone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4 7 9M12 4l5 5"/><path d="M4 16v2.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V16"/></svg>
+          <b>拖拽小票 / 发票图片到此处，或点击上传</b>
+          <span>支持 JPG · PNG</span>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" multiple style="display:none;">
+        <p class="footnote" style="margin-top:12px;">本演示为纯前端原型，浏览器沙箱无法访问外部 AI 接口，因此无法读取图片像素内容（如小票上的商品名称、金额印刷字样）——系统只能尝试从<b>文件名</b>解析供应商 / 日期 / 金额线索，识别不到时会明确提示需要手动填写。正式对接 TaxHacker 后端会调用真实的 OCR + 大模型视觉识别接口，直接从图片中提取这些字段。</p>
+      </div>
+
+      <div class="section-title"><h3>发票清单</h3><span class="hint" id="invoiceCountHint"></span></div>
+      <div class="invoice-grid" id="invoiceGrid"></div>
+    </section>
+
+    <!-- ===================== REPORTS ===================== -->
+    <section class="view" id="view-reports">
+      <div class="page-head">
+        <div><h2>报表中心</h2><p>汇总销项税（POS 销售）与进项税（TaxHacker 已确认发票），并给出芬兰增值税申报净额。</p></div>
+        <div class="field" style="width:160px;">
+          <label>统计范围</label>
+          <select id="reportRange">
+            <option value="all">全部记录</option>
+            <option value="30">最近 30 天</option>
+            <option value="7">最近 7 天</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="section-title"><h3>增值税申报摘要</h3><span class="hint">Arvonlisäveroilmoitus · VAT Summary</span></div>
+        <div class="grid-3" style="margin-top:12px;">
+          <div>
+            <div class="kpi" style="box-shadow:none;border-style:dashed;">
+              <div class="label">销项税额 · Myynnin ALV</div>
+              <div class="value num" id="repOutputVat">0,00 €</div>
+              <div class="delta">来自 POS 销售（13,5%）</div>
+            </div>
+          </div>
+          <div>
+            <div class="kpi" style="box-shadow:none;border-style:dashed;">
+              <div class="label">进项税额 · Ostojen ALV</div>
+              <div class="value num" id="repInputVat">0,00 €</div>
+              <div class="delta">来自已确认发票</div>
+            </div>
+          </div>
+          <div>
+            <div class="kpi" style="box-shadow:none;border-style:dashed;border-color:var(--accent);">
+              <div class="label">应缴 / 可退净额</div>
+              <div class="value num" id="repNetVat">0,00 €</div>
+              <div class="delta" id="repNetVatNote">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card card-pad">
+          <div class="section-title"><h3>按小时销售分布</h3><span class="hint">全部记录 · 按下单小时聚合</span></div>
+          <div class="hourbars" id="hourChart" style="margin-top:16px;"></div>
+          <div class="hourlabels" id="hourLabels"></div>
+        </div>
+        <div class="card card-pad">
+          <div class="section-title"><h3>按产品分类销售占比</h3><span class="hint">Nigiri / Gungan / Maki / 套餐</span></div>
+          <div class="bars" id="groupBars" style="margin-top:12px;"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title" style="padding:16px 20px 0;"><h3>热销产品排行</h3></div>
+        <div class="table-wrap" style="margin-top:8px;">
+          <table><thead><tr><th>#</th><th>产品</th><th>分类</th><th>销量</th><th>含税营业额</th></tr></thead>
+          <tbody id="topProductsTable"></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SETTINGS ===================== -->
+    <section class="view" id="view-settings">
+      <div class="page-head">
+        <div><h2>系统设置</h2><p>公司信息、芬兰增值税税率与收银员名单。</p></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card card-pad">
+          <div class="section-title"><h3>公司信息</h3></div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px;">
+            <div class="field"><label>门店名称</label><input id="setShopName" type="text"></div>
+            <div class="field"><label>公司名称</label><input id="setCompanyName" type="text"></div>
+            <div class="field-row">
+              <div class="field"><label>Y-tunnus（商业登记号）</label><input id="setBizId" type="text"></div>
+              <div class="field"><label>所在地</label><input id="setCity" type="text"></div>
+            </div>
+            <button class="btn primary" id="saveSettingsBtn" style="align-self:flex-start;">保存</button>
+          </div>
+        </div>
+
+        <div class="card card-pad">
+          <div class="section-title"><h3>增值税税率（Suomi）</h3></div>
+          <div class="table-wrap" style="margin-top:12px;">
+            <table><thead><tr><th>用途</th><th>税率</th></tr></thead>
+            <tbody id="vatRatesTable"></tbody></table>
+          </div>
+          <p class="footnote" style="margin-top:10px;">餐饮 / 食品类销售适用 13,5% 税率；一般商品与服务（如包材、租金）适用标准税率；反向征税项目为 0%。</p>
+        </div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="section-title">
+          <h3>支付网关 · Viva.com Terminal API</h3>
+          <span class="pill" id="vivaStatusPill">—</span>
+        </div>
+        <p class="footnote" style="margin-top:6px;">连接后，POS 收银台的刷卡结账会调用读卡终端发起支付，交易结果通过 Webhook 实时回传更新订单状态。演示环境中终端响应与 Webhook 事件为本地模拟；正式对接需在后端调用 Viva.com REST API 并配置真实回调地址。</p>
+        <div class="grid-2" style="margin-top:12px;">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="field-row">
+              <div class="field"><label>Client ID</label><input id="setVivaClientId" type="text" placeholder="lumo-sushi-pos-01"></div>
+              <div class="field"><label>Client Secret</label><input id="setVivaClientSecret" type="password" placeholder="sk_live_••••••••"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Merchant ID</label><input id="setVivaMerchantId" type="text" placeholder="Viva 商户 UUID"></div>
+              <div class="field"><label>Terminal ID</label><input id="setVivaTerminalId" type="text" placeholder="例如 T-4471"></div>
+            </div>
+            <div class="field"><label>Webhook 回调地址（填入 Viva 商户后台）</label><input id="setVivaWebhook" type="text" readonly></div>
+            <button class="btn primary" id="vivaConnectBtn" style="align-self:flex-start;">连接终端</button>
+          </div>
+          <div>
+            <div class="section-title"><h3 style="font-size:13px;">最近 Webhook 事件</h3><span class="hint">最新在前</span></div>
+            <div class="table-wrap table-scroll" style="margin-top:8px;max-height:220px;">
+              <table><thead><tr><th>时间</th><th>事件</th><th>订单号</th><th>状态</th></tr></thead>
+              <tbody id="webhookLogTable"></tbody></table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="section-title"><h3>收银员</h3></div>
+        <div class="tag-list" id="clerkTags" style="margin-top:10px;"></div>
+        <div class="field" style="flex-direction:row;gap:8px;margin-top:12px;max-width:320px;">
+          <input id="newClerkInput" type="text" placeholder="新增收银员姓名" style="flex:1;">
+          <button class="btn" id="addClerkBtn">添加</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Generic modal -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modalBox">
+    <div class="modal-head">
+      <h3 id="modalTitle">标题</h3>
+      <button class="modal-close" id="modalCloseBtn" aria-label="关闭">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="dot"></span><span id="toastMsg"></span></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   Storage & state
+   ============================================================ */
+const STORAGE_KEY = "lumo_erp_v1";
+let state = null;
+
+function seedState(){
+  const materials = [
+    {id:"m1",  name:"Sushiriisi (寿司米)",        unit:"kg",  stock:25,  threshold:5,   cost:2.10},
+    {id:"m2",  name:"Nori-levy (紫菜)",           unit:"kpl", stock:400, threshold:80,  cost:0.09},
+    {id:"m3",  name:"Lohifilee (三文鱼柳)",        unit:"kg",  stock:6.5, threshold:3,   cost:18.50},
+    {id:"m4",  name:"Tonnikalafilee (金枪鱼柳)",   unit:"kg",  stock:4.2, threshold:3,   cost:24.00},
+    {id:"m5",  name:"Katkarapu (虾仁)",           unit:"kg",  stock:3.8, threshold:2,   cost:14.00},
+    {id:"m6",  name:"Rapupuikko (蟹肉棒)",        unit:"kg",  stock:2.5, threshold:1.5, cost:6.50},
+    {id:"m7",  name:"Kananmuna (鸡蛋)",           unit:"kpl", stock:36,  threshold:12,  cost:0.35},
+    {id:"m8",  name:"Avocado (牛油果)",           unit:"kpl", stock:22,  threshold:10,  cost:0.90},
+    {id:"m9",  name:"Tofu (豆腐)",                unit:"kg",  stock:3.0, threshold:1,   cost:4.20},
+    {id:"m10", name:"Wakame-levä (裙带菜)",       unit:"kg",  stock:0.8, threshold:1,   cost:16.00},
+    {id:"m11", name:"Ankerias, savustettu (烟熏鳗鱼)", unit:"kg", stock:0.6, threshold:1, cost:32.00},
+    {id:"m12", name:"Riisietikka (寿司醋)",        unit:"L",   stock:4.0, threshold:1,   cost:5.50},
+    {id:"m13", name:"Majoneesi, chili (辣味蛋黄酱)", unit:"kg", stock:1.8, threshold:1,   cost:6.00},
+    {id:"m14", name:"Chilikastike (辣酱)",         unit:"L",   stock:1.2, threshold:0.5, cost:7.50},
+    {id:"m15", name:"Kurkku (黄瓜)",              unit:"kpl", stock:15,  threshold:8,   cost:0.60},
+  ];
+
+  const products = [
+    {id:"p1", code:"N1",  name:"Lohi",                 group:"Nigiri Sushi", vat:13.5, priceExcl:0.88,
+      bom:[["m1",0.020],["m3",0.015],["m12",0.002]]},
+    {id:"p2", code:"N2",  name:"Grillattu Lohi",        group:"Nigiri Sushi", vat:13.5, priceExcl:0.88,
+      bom:[["m1",0.020],["m3",0.015],["m14",0.003]]},
+    {id:"p3", code:"N3",  name:"Katkarapu",             group:"Nigiri Sushi", vat:13.5, priceExcl:0.88,
+      bom:[["m1",0.020],["m5",0.012]]},
+    {id:"p4", code:"N4",  name:"Rapupuikko",            group:"Nigiri Sushi", vat:13.5, priceExcl:0.88,
+      bom:[["m1",0.020],["m6",0.012],["m13",0.003]]},
+    {id:"p5", code:"N5",  name:"Kananmuna",             group:"Nigiri Sushi", vat:13.5, priceExcl:0.88,
+      bom:[["m1",0.020],["m7",0.10]]},
+    {id:"p6", code:"N6",  name:"Avocado",               group:"Nigiri Sushi", vat:13.5, priceExcl:0.88,
+      bom:[["m1",0.020],["m8",0.15]]},
+    {id:"p7", code:"N7",  name:"Tofu",                  group:"Nigiri Sushi", vat:13.5, priceExcl:0.88,
+      bom:[["m1",0.020],["m9",0.015]]},
+    {id:"p8", code:"N8",  name:"Grillattu ankerias",    group:"Nigiri Sushi", vat:13.5, priceExcl:0.88,
+      bom:[["m1",0.020],["m11",0.015],["m14",0.002]]},
+    {id:"p9", code:"N9",  name:"Tonnikala",             group:"Nigiri Sushi", vat:13.5, priceExcl:0.88,
+      bom:[["m1",0.020],["m4",0.015]]},
+    {id:"p10",code:"N10", name:"Tulinen katkarapu",     group:"Nigiri Sushi", vat:13.5, priceExcl:0.88,
+      bom:[["m1",0.020],["m5",0.012],["m14",0.004]]},
+
+    {id:"p11",code:"G1", name:"Tonnikala Gunkan",       group:"Gunkan Sushi", vat:13.5, priceExcl:0.88,
+      bom:[["m1",0.018],["m2",0.5],["m4",0.010],["m13",0.003]]},
+    {id:"p12",code:"G2", name:"Lohi Gunkan",            group:"Gunkan Sushi", vat:13.5, priceExcl:0.88,
+      bom:[["m1",0.018],["m2",0.5],["m3",0.010],["m13",0.003]]},
+    {id:"p13",code:"G3", name:"Katkarapu Gunkan",       group:"Gunkan Sushi", vat:13.5, priceExcl:0.88,
+      bom:[["m1",0.018],["m2",0.5],["m5",0.010],["m13",0.003]]},
+    {id:"p14",code:"G4", name:"Wakame Gunkan",          group:"Gunkan Sushi", vat:13.5, priceExcl:0.88,
+      bom:[["m1",0.018],["m2",0.5],["m10",0.012]]},
+
+    {id:"p15",code:"M1", name:"Lohi Maki",              group:"Maki Sushi",   vat:13.5, priceExcl:1.76,
+      bom:[["m1",0.090],["m2",1],["m3",0.045],["m15",0.15]]},
+    {id:"p16",code:"M2", name:"Tonnikala Maki",         group:"Maki Sushi",   vat:13.5, priceExcl:1.76,
+      bom:[["m1",0.090],["m2",1],["m4",0.045],["m15",0.15]]},
+    {id:"p17",code:"M3", name:"Avocado Maki",           group:"Maki Sushi",   vat:13.5, priceExcl:1.76,
+      bom:[["m1",0.090],["m2",1],["m8",0.6],["m15",0.20]]},
+    {id:"p18",code:"M4", name:"Kasvis Maki",            group:"Maki Sushi",   vat:13.5, priceExcl:1.76,
+      bom:[["m1",0.090],["m2",1],["m8",0.3],["m9",0.02],["m15",0.30]]},
+
+    {id:"p19",code:"S1", name:"Sushi Lounasboksi 12kpl",group:"Setit",        vat:13.5, priceExcl:8.81,
+      bom:[["m1",0.150],["m2",1],["m3",0.030],["m4",0.020],["m5",0.020],["m8",0.20],["m7",0.05],["m15",0.10],["m12",0.010]]},
+  ];
+
+  const clerks = ["Aino Virtanen","Mikko Laine","Sara Nguyen"];
+  const paymentMethods = [
+    {id:"card", label:"刷卡 Kortti"},
+    {id:"cash", label:"现金 Käteinen"},
+    {id:"mobile", label:"MobilePay"},
+  ];
+  const vatRates = [
+    {id:"food", label:"餐饮 / 食品 (Ravintola & elintarvike)", rate:13.5},
+    {id:"general", label:"一般税率 (Yleinen verokanta)", rate:25.5},
+    {id:"reverse", label:"反向征税 (Käännetty verovelvollisuus)", rate:0},
+  ];
+  const vendors = ["Kespro Oy","Meira Nova Oy","Suomen Kalatukku Oy","Metro Tukku","HFC Fresh Convenience","Foodela Wholesale Oy"];
+  const invoiceCategories = ["原材料采购 (Raaka-aineet)","包装材料 (Pakkaukset)","店铺租金 (Vuokra)","其他杂项 (Muut)"];
+
+  const rng = mulberry32(20260827);
+  const now = new Date();
+  const sales = [];
+  let saleSeq = 1;
+  for(let d=6; d>=0; d--){
+    const day = new Date(now); day.setDate(now.getDate()-d);
+    const txCount = 5 + Math.floor(rng()*8);
+    for(let t=0;t<txCount;t++){
+      const hour = 10 + Math.floor(rng()*11); // 10..20
+      const min = Math.floor(rng()*60);
+      const time = new Date(day); time.setHours(hour,min,0,0);
+      if(time > now) continue;
+      const lineCount = 1 + Math.floor(rng()*4);
+      const items = [];
+      for(let i=0;i<lineCount;i++){
+        const p = products[Math.floor(rng()*products.length)];
+        const qty = 1 + Math.floor(rng()*3);
+        items.push({productId:p.id, name:p.name, code:p.code, group:p.group, qty, priceExcl:p.priceExcl, vat:p.vat});
+      }
+      const totalExcl = items.reduce((s,it)=>s+it.priceExcl*it.qty,0);
+      const totalVat = items.reduce((s,it)=>s+it.priceExcl*it.qty*(it.vat/100),0);
+      const payRoll = rng();
+      const payment = payRoll<0.62?"card":(payRoll<0.9?"cash":"mobile");
+      sales.push({
+        id:"POS-"+String(saleSeq).padStart(6,"0"),
+        time:time.toISOString(),
+        clerk: clerks[Math.floor(rng()*clerks.length)],
+        payment, items,
+        totalExcl, totalVat, totalIncl: totalExcl+totalVat,
+      });
+      saleSeq++;
+    }
+  }
+  sales.sort((a,b)=> new Date(b.time)-new Date(a.time));
+
+  const invoices = [
+    {
+      id:"INV-000001", filename:"kespro_lasku_0812.jpg", thumb:null,
+      status:"approved", vendor:"Kespro Oy", item:"生鲜与干货补货", date: isoDaysAgo(5),
+      amountExcl: 214.30, vatRate:13.5, category: invoiceCategories[0], note:"",
+      uploadedAt: isoDaysAgo(5),
+    },
+    {
+      id:"INV-000002", filename:"pakkaus_hankinta.jpg", thumb:null,
+      status:"approved", vendor:"Foodela Wholesale Oy", item:"外卖打包盒 / 餐具", date: isoDaysAgo(3),
+      amountExcl: 58.90, vatRate:25.5, category: invoiceCategories[1], note:"",
+      uploadedAt: isoDaysAgo(3),
+    },
+    {
+      id:"INV-000003", filename:"kalatukku_kuitti.jpg", thumb:null,
+      status:"pending", vendor:"Suomen Kalatukku Oy", item:"冷冻虾仁 5kg", date: isoDaysAgo(1),
+      amountExcl: 176.40, vatRate:13.5, category: invoiceCategories[0], note:"",
+      uploadedAt: isoDaysAgo(1),
+    },
+  ];
+
+  const webhookLog = [
+    {id:"wh1", time: isoDaysAgo(30), event:"Webhook.Verified", orderCode:"—", status:"OK", amount:null},
+    {id:"wh2", time: isoDaysAgo(1),  event:"Transaction.Payment.Created", orderCode:"ORD-88213", status:"Succeeded", amount:1.00},
+  ];
+
+  return {
+    materials, products, clerks, paymentMethods, vatRates, vendors, invoiceCategories,
+    sales, invoices,
+    cart:[], activeGroup:"Nigiri Sushi", activePayment:"card", activeClerk: clerks[0],
+    nextInvoiceSeq: 4,
+    settings:{ shopName:"Lumo Sushi", companyName:"Smile Deer Oy", bizId:"3287451-2", city:"Helsinki",
+      receiptApiBase:"http://localhost:8000", receiptApiStatus:"unknown" },
+    integrations:{
+      viva:{
+        connected:true,
+        clientId:"lumo-sushi-pos-01",
+        clientSecret:"sk_live_c8c1a9e2f2a",
+        merchantId:"7f3c1a2e-9b4d-4e6a-9c11-2d8f5a6b7c90",
+        terminalId:"T-4471",
+        environment:"production",
+      }
+    },
+    webhookLog,
+    theme:"system",
+    view:"dashboard",
+  };
+}
+
+function mulberry32(a){
+  return function(){
+    a|=0; a = a+0x6D2B79F5|0;
+    let t = Math.imul(a ^ a>>>15, 1|a);
+    t = t+Math.imul(t ^ t>>>7, 61|t) ^ t;
+    return ((t ^ t>>>14)>>>0)/4294967296;
+  };
+}
+function isoDaysAgo(n){ const d=new Date(); d.setDate(d.getDate()-n); d.setHours(9+Math.floor(n),15,0,0); return d.toISOString(); }
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(parsed && parsed.products && parsed.materials){
+        if(!parsed.integrations) parsed.integrations = {
+          viva:{ connected:true, clientId:"lumo-sushi-pos-01", clientSecret:"sk_live_c8c1a9e2f2a",
+            merchantId:"7f3c1a2e-9b4d-4e6a-9c11-2d8f5a6b7c90", terminalId:"T-4471", environment:"production" }
+        };
+        if(!parsed.webhookLog) parsed.webhookLog = [];
+        if(parsed.settings && parsed.settings.receiptApiBase===undefined) parsed.settings.receiptApiBase = "http://localhost:8000";
+        if(parsed.settings && parsed.settings.receiptApiStatus===undefined) parsed.settings.receiptApiStatus = "unknown";
+        return parsed;
+      }
+    }
+  }catch(e){}
+  return seedState();
+}
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+}
+
+/* ============================================================
+   Helpers
+   ============================================================ */
+function money(n){
+  return (Math.round(n*100)/100).toFixed(2).replace(".", ",") + " €";
+}
+function num(n, d){
+  d = d===undefined?2:d;
+  return (Math.round(n*Math.pow(10,d))/Math.pow(10,d)).toFixed(d).replace(".", ",");
+}
+function fmtDateTime(iso){
+  const d = new Date(iso);
+  const pad = x=>String(x).padStart(2,"0");
+  return pad(d.getDate())+"."+pad(d.getMonth()+1)+"."+d.getFullYear()+" "+pad(d.getHours())+":"+pad(d.getMinutes());
+}
+function fmtDate(iso){
+  const d = new Date(iso);
+  const pad = x=>String(x).padStart(2,"0");
+  return pad(d.getDate())+"."+pad(d.getMonth()+1)+"."+d.getFullYear();
+}
+function priceIncl(p){ return p.priceExcl * (1 + p.vat/100); }
+function findProduct(id){ return state.products.find(p=>p.id===id); }
+function findMaterial(id){ return state.materials.find(m=>m.id===id); }
+function stockStatus(m){
+  if(m.stock <= m.threshold) return "crit";
+  if(m.stock <= m.threshold*1.5) return "warn";
+  return "ok";
+}
+function paymentLabel(id){ const p=state.paymentMethods.find(x=>x.id===id); return p?p.label:id; }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function showToast(msg, isErr){
+  const t = document.getElementById("toast");
+  document.getElementById("toastMsg").textContent = msg;
+  t.classList.toggle("err", !!isErr);
+  t.classList.add("show");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=>t.classList.remove("show"), 2600);
+}
+
+/* ============================================================
+   Modal helpers
+   ============================================================ */
+function openModal(title, bodyHtml, footButtons){
+  document.getElementById("modalTitle").textContent = title;
+  document.getElementById("modalBody").innerHTML = bodyHtml;
+  const foot = document.getElementById("modalFoot");
+  foot.innerHTML = "";
+  (footButtons||[]).forEach(b=>{
+    const btn = document.createElement("button");
+    btn.className = "btn" + (b.cls?(" "+b.cls):"");
+    btn.textContent = b.label;
+    btn.addEventListener("click", b.onClick);
+    foot.appendChild(btn);
+  });
+  document.getElementById("modalBackdrop").classList.add("open");
+}
+function closeModal(){ document.getElementById("modalBackdrop").classList.remove("open"); }
+document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
+document.getElementById("modalBackdrop").addEventListener("click", function(e){
+  if(e.target===this && document.getElementById("modalCloseBtn").style.display !== "none") closeModal();
+});
+
+/* ============================================================
+   Navigation
+   ============================================================ */
+const VIEW_TITLES = {
+  dashboard:"概览", pos:"POS 收银台", sales:"销售记录", products:"寿司产品 & BOM",
+  inventory:"原材料库存", invoices:"TaxHacker 发票 AI 识别", reports:"报表中心", settings:"系统设置",
+};
+function switchView(view){
+  state.view = view;
+  document.querySelectorAll(".nav-item").forEach(el=> el.classList.toggle("active", el.dataset.view===view));
+  document.querySelectorAll(".view").forEach(el=> el.classList.toggle("active", el.id==="view-"+view));
+  document.getElementById("topbarTitle").textContent = VIEW_TITLES[view] || view;
+  renderView(view);
+  saveState();
+}
+document.querySelectorAll(".nav-item[data-view]").forEach(el=>{
+  el.addEventListener("click", ()=> switchView(el.dataset.view));
+});
+
+function renderView(view){
+  if(view==="dashboard") renderDashboard();
+  else if(view==="pos") renderPOS();
+  else if(view==="sales") renderSales();
+  else if(view==="products") renderProducts();
+  else if(view==="inventory") renderInventory();
+  else if(view==="invoices") renderInvoices();
+  else if(view==="reports") renderReports();
+  else if(view==="settings") renderSettings();
+  updateNavBadges();
+}
+
+function updateNavBadges(){
+  const low = state.materials.filter(m=>stockStatus(m)!=="ok").length;
+  const lb = document.getElementById("navLowStockBadge");
+  if(low>0){ lb.style.display="inline-block"; lb.textContent=low; } else lb.style.display="none";
+  const pending = state.invoices.filter(i=>i.status==="pending").length;
+  const pb = document.getElementById("navPendingBadge");
+  if(pending>0){ pb.style.display="inline-block"; pb.textContent=pending; } else pb.style.display="none";
+}
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+function isToday(iso){
+  const d = new Date(iso), t = new Date();
+  return d.getFullYear()===t.getFullYear() && d.getMonth()===t.getMonth() && d.getDate()===t.getDate();
+}
+function isYesterday(iso){
+  const d = new Date(iso), t = new Date(); t.setDate(t.getDate()-1);
+  return d.getFullYear()===t.getFullYear() && d.getMonth()===t.getMonth() && d.getDate()===t.getDate();
+}
+function renderDashboard(){
+  const today = state.sales.filter(s=>isToday(s.time));
+  const yesterday = state.sales.filter(s=>isYesterday(s.time));
+  const revToday = today.reduce((s,x)=>s+x.totalIncl,0);
+  const revYesterday = yesterday.reduce((s,x)=>s+x.totalIncl,0);
+  const cardToday = today.filter(s=>s.payment==="card").reduce((s,x)=>s+x.totalIncl,0);
+  const cashToday = today.filter(s=>s.payment==="cash").reduce((s,x)=>s+x.totalIncl,0);
+  const mobileToday = today.filter(s=>s.payment==="mobile").reduce((s,x)=>s+x.totalIncl,0);
+  const lowCount = state.materials.filter(m=>stockStatus(m)!=="ok").length;
+  const pendingInv = state.invoices.filter(i=>i.status==="pending");
+  const delta = revYesterday>0 ? ((revToday-revYesterday)/revYesterday*100) : 0;
+
+  const kpis = [
+    {label:"今日营业额（含税）", value: money(revToday), delta: (delta>=0?"↑ ":"↓ ")+Math.abs(delta).toFixed(1)+"% 较昨日", cls: delta>=0?"up":"down"},
+    {label:"今日刷卡入账", value: money(cardToday), delta: "现金 "+money(cashToday)+" · 移动支付 "+money(mobileToday), cls:""},
+    {label:"今日订单数", value: String(today.length), delta: today.length? "客单价 "+money(revToday/today.length) : "暂无订单", cls:""},
+    {label:"库存预警", value: String(lowCount), delta: lowCount? "项原材料低于安全库存":"库存状态正常", cls: lowCount?"down":"up"},
+  ];
+  document.getElementById("kpiGrid").innerHTML = kpis.map(k=>`
+    <div class="kpi">
+      <div class="label">${k.label}</div>
+      <div class="value num">${k.value}</div>
+      <div class="delta ${k.cls}">${k.delta}</div>
+    </div>`).join("");
+
+  const byProduct = {};
+  today.forEach(s=> s.items.forEach(it=>{
+    byProduct[it.productId] = byProduct[it.productId] || {name:it.name, code:it.code, revenue:0, qty:0};
+    byProduct[it.productId].revenue += it.priceExcl*it.qty*(1+it.vat/100);
+    byProduct[it.productId].qty += it.qty;
+  }));
+  const topList = Object.values(byProduct).sort((a,b)=>b.revenue-a.revenue).slice(0,5);
+  const maxRev = Math.max(1, ...topList.map(x=>x.revenue));
+  document.getElementById("topProductsBar").innerHTML = topList.length? topList.map(x=>`
+    <div class="bar-row">
+      <div class="name" title="${escapeHtml(x.name)}">${escapeHtml(x.code)} ${escapeHtml(x.name)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(x.revenue/maxRev*100).toFixed(1)}%"></div></div>
+      <div class="val num">${money(x.revenue)}</div>
+    </div>`).join("") : `<p class="footnote">今日暂无销售记录。</p>`;
+
+  const paySplit = [
+    {label:"刷卡 Kortti", value:cardToday, color:"var(--accent)"},
+    {label:"现金 Käteinen", value:cashToday, color:"var(--salmon)"},
+    {label:"MobilePay", value:mobileToday, color:"var(--ink-faint)"},
+  ];
+  const totalPay = Math.max(1, cardToday+cashToday+mobileToday);
+  const gradient = (function(){
+    let acc=0; const parts=[];
+    paySplit.forEach(p=>{ const pct = p.value/totalPay*100; parts.push(`${p.color} ${acc}% ${acc+pct}%`); acc+=pct; });
+    return parts.join(", ");
+  })();
+  document.getElementById("paymentSplit").innerHTML = `
+    <div style="display:flex;align-items:center;gap:18px;">
+      <div style="width:96px;height:96px;border-radius:50%;background:conic-gradient(${gradient});flex:none;"></div>
+      <div class="legend" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        ${paySplit.map(p=>`<span><i style="background:${p.color}"></i>${p.label} — <span class="num">${money(p.value)}</span></span>`).join("")}
+      </div>
+    </div>`;
+
+  const lowMats = state.materials.filter(m=>stockStatus(m)!=="ok").sort((a,b)=> (a.stock/a.threshold)-(b.stock/b.threshold));
+  document.getElementById("lowStockTable").innerHTML = lowMats.length ? lowMats.map(m=>`
+    <tr><td>${escapeHtml(m.name)}</td><td class="num">${num(m.stock,2)} ${m.unit}</td><td class="num">${num(m.threshold,2)} ${m.unit}</td>
+    <td><span class="pill ${stockStatus(m)}">${stockStatus(m)==="crit"?"紧急":"偏低"}</span></td></tr>`).join("")
+    : `<tr><td colspan="4" class="footnote">全部原材料库存充足。</td></tr>`;
+
+  document.getElementById("pendingInvoiceList").innerHTML = pendingInv.length ? pendingInv.map(i=>`
+    <div class="card" style="padding:10px 12px;box-shadow:none;cursor:pointer;" data-open-invoice="${i.id}">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:700;font-size:13px;">${i.vendor ? escapeHtml(i.vendor) : '<span style="color:var(--crit);">供应商未识别</span>'}</div>
+          <div class="footnote">${fmtDate(i.date)} · ${escapeHtml(i.category)}</div>
+        </div>
+        <div class="num" style="font-weight:600;">${money(i.amountExcl*(1+i.vatRate/100))}</div>
+      </div>
+    </div>`).join("") : `<p class="footnote">暂无待处理发票，TaxHacker 一切就绪。</p>`;
+  document.querySelectorAll("[data-open-invoice]").forEach(el=>{
+    el.addEventListener("click", ()=>{ switchView("invoices"); setTimeout(()=>openInvoiceModal(el.dataset.openInvoice), 50); });
+  });
+}
+
+/* ============================================================
+   POS
+   ============================================================ */
+function renderPOS(){
+  const term = state.integrations.viva;
+  const termPill = document.getElementById("termStatusPill");
+  if(term.connected){
+    termPill.className = "pill ok";
+    termPill.textContent = "已连接 · "+term.terminalId;
+    termPill.style.cursor = "default";
+    termPill.onclick = null;
+  } else {
+    termPill.className = "pill crit";
+    termPill.textContent = "未连接 · 去设置";
+    termPill.style.cursor = "pointer";
+    termPill.onclick = ()=> switchView("settings");
+  }
+
+  const clerkSel = document.getElementById("clerkSelect");
+  clerkSel.innerHTML = state.clerks.map(c=>`<option value="${escapeHtml(c)}" ${c===state.activeClerk?"selected":""}>${escapeHtml(c)}</option>`).join("");
+  clerkSel.onchange = ()=>{ state.activeClerk = clerkSel.value; saveState(); };
+
+  const groups = [...new Set(state.products.map(p=>p.group))];
+  document.getElementById("posTabs").innerHTML = groups.map(g=>
+    `<button type="button" class="pos-tab ${g===state.activeGroup?"active":""}" data-group="${escapeHtml(g)}">${escapeHtml(g)}</button>`
+  ).join("");
+  document.querySelectorAll(".pos-tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{ state.activeGroup = btn.dataset.group; renderPOS(); });
+  });
+
+  const items = state.products.filter(p=>p.group===state.activeGroup);
+  document.getElementById("posGrid").innerHTML = items.map(p=>`
+    <button type="button" class="product-tile" data-add="${p.id}">
+      <span class="code">${escapeHtml(p.code)}</span>
+      <span class="pname">${escapeHtml(p.name)}</span>
+      <span class="pprice num">${money(priceIncl(p))}</span>
+    </button>`).join("");
+  document.querySelectorAll("[data-add]").forEach(el=>{
+    el.addEventListener("click", ()=> addToCart(el.dataset.add));
+  });
+
+  const pm = document.getElementById("payMethods");
+  pm.innerHTML = state.paymentMethods.map(p=>`<button type="button" class="pay-btn ${p.id===state.activePayment?"active":""}" data-pay="${p.id}">${escapeHtml(p.label)}</button>`).join("");
+  document.querySelectorAll("[data-pay]").forEach(el=>{
+    el.addEventListener("click", ()=>{ state.activePayment = el.dataset.pay; renderPOS(); });
+  });
+
+  renderCart();
+}
+
+function addToCart(productId){
+  const existing = state.cart.find(c=>c.productId===productId);
+  if(existing) existing.qty += 1;
+  else state.cart.push({productId, qty:1});
+  saveState();
+  renderCart();
+}
+function changeCartQty(productId, delta){
+  const row = state.cart.find(c=>c.productId===productId);
+  if(!row) return;
+  row.qty += delta;
+  if(row.qty<=0) state.cart = state.cart.filter(c=>c.productId!==productId);
+  saveState();
+  renderCart();
+}
+function renderCart(){
+  const list = document.getElementById("cartList");
+  if(state.cart.length===0){
+    list.innerHTML = `<div class="cart-empty">购物车是空的，点击左侧商品添加</div>`;
+  } else {
+    list.innerHTML = state.cart.map(c=>{
+      const p = findProduct(c.productId);
+      if(!p) return "";
+      return `<div class="cart-row">
+        <div>
+          <div class="cname">${escapeHtml(p.name)}</div>
+          <div class="cmeta">${escapeHtml(p.code)} · ${money(priceIncl(p))} / 件</div>
+        </div>
+        <div class="qty-ctrl">
+          <button type="button" data-qty="-1" data-id="${p.id}">–</button>
+          <span class="num">${c.qty}</span>
+          <button type="button" data-qty="1" data-id="${p.id}">+</button>
+        </div>
+      </div>`;
+    }).join("");
+    list.querySelectorAll("[data-qty]").forEach(el=>{
+      el.addEventListener("click", ()=> changeCartQty(el.dataset.id, parseInt(el.dataset.qty,10)));
+    });
+  }
+
+  const totals = computeCartTotals(state.cart);
+  document.getElementById("sumExcl").textContent = money(totals.excl);
+  document.getElementById("sumVat").textContent = money(totals.vat);
+  document.getElementById("sumIncl").textContent = money(totals.incl);
+  document.getElementById("cartCount").textContent = state.cart.reduce((s,c)=>s+c.qty,0)+" 件";
+  document.getElementById("cartWarning").style.display="none";
+}
+
+function computeCartTotals(cart){
+  let excl=0, vat=0;
+  cart.forEach(c=>{
+    const p = findProduct(c.productId); if(!p) return;
+    excl += p.priceExcl*c.qty;
+    vat += p.priceExcl*c.qty*(p.vat/100);
+  });
+  return {excl, vat, incl: excl+vat};
+}
+
+function computeRequiredMaterials(cart){
+  const req = {};
+  cart.forEach(c=>{
+    const p = findProduct(c.productId); if(!p) return;
+    p.bom.forEach(([matId, qtyPer])=>{
+      req[matId] = (req[matId]||0) + qtyPer*c.qty;
+    });
+  });
+  return req;
+}
+
+function logWebhook(event, orderCode, status, amount){
+  state.webhookLog.unshift({
+    id:"wh"+Date.now()+Math.floor(Math.random()*1000),
+    time:new Date().toISOString(), event, orderCode, status, amount,
+  });
+  state.webhookLog = state.webhookLog.slice(0,30);
+  saveState();
+  if(document.getElementById("view-settings").classList.contains("active")) renderWebhookLog();
+}
+
+function finalizeSale(req, terminal){
+  Object.keys(req).forEach(matId=>{
+    const m = findMaterial(matId);
+    m.stock = Math.round((m.stock - req[matId])*1000)/1000;
+  });
+  const items = state.cart.map(c=>{
+    const p = findProduct(c.productId);
+    return {productId:p.id, name:p.name, code:p.code, group:p.group, qty:c.qty, priceExcl:p.priceExcl, vat:p.vat};
+  });
+  const totalExcl = items.reduce((s,it)=>s+it.priceExcl*it.qty,0);
+  const totalVat = items.reduce((s,it)=>s+it.priceExcl*it.qty*(it.vat/100),0);
+  const seq = state.sales.length+1;
+  const sale = {
+    id:"POS-"+String(seq).padStart(6,"0"),
+    time:new Date().toISOString(),
+    clerk: state.activeClerk,
+    payment: state.activePayment,
+    items, totalExcl, totalVat, totalIncl: totalExcl+totalVat,
+  };
+  if(terminal) sale.terminal = terminal;
+  state.sales.unshift(sale);
+  state.cart = [];
+  saveState();
+  renderPOS();
+  showToast("结账完成 · "+sale.id+" · "+money(sale.totalIncl));
+}
+
+function randHex(len){
+  let s=""; for(let i=0;i<len;i++) s += "0123456789ABCDEF"[Math.floor(Math.random()*16)];
+  return s;
+}
+function randDigits(len){
+  let s=""; for(let i=0;i<len;i++) s += Math.floor(Math.random()*10);
+  return s;
+}
+
+function runTerminalPayment(req, totals){
+  const term = state.integrations.viva;
+  const orderCode = "ORD-"+randDigits(6);
+  const checkoutBtn = document.getElementById("checkoutBtn");
+  checkoutBtn.disabled = true;
+  let aborted = false;
+
+  logWebhook("Transaction.Created", orderCode, "Pending", totals.incl);
+
+  document.getElementById("modalCloseBtn").style.display = "none";
+  openModal("刷卡终端支付", `
+    <div style="text-align:center;padding:14px 0;">
+      <div class="spinner" style="width:34px;height:34px;border-width:3px;margin:0 auto 16px;"></div>
+      <div id="termStage" style="font-weight:700;font-size:15px;">正在连接读卡终端…</div>
+      <div class="footnote" style="margin-top:8px;">终端 <span class="num">${escapeHtml(term.terminalId)}</span> · 订单号 <span class="num">${orderCode}</span> · 金额 <span class="num" style="font-weight:600;color:var(--ink);">${money(totals.incl)}</span></div>
+    </div>
+  `, [{label:"取消交易", cls:"ghost", onClick:()=>{
+    aborted = true;
+    logWebhook("Transaction.Cancelled", orderCode, "Cancelled", totals.incl);
+    document.getElementById("modalCloseBtn").style.display = "";
+    closeModal();
+    checkoutBtn.disabled = false;
+  }}]);
+
+  const stageEl = ()=> document.getElementById("termStage");
+  setTimeout(()=>{ if(!aborted && stageEl()) stageEl().textContent = "请在终端上刷卡 / 插卡 / 挥卡…"; }, 700);
+  setTimeout(()=>{ if(!aborted && stageEl()) stageEl().textContent = "等待发卡行授权…"; }, 1600);
+
+  setTimeout(()=>{
+    if(aborted) return;
+    const success = Math.random() < 0.9;
+    document.getElementById("modalCloseBtn").style.display = "";
+
+    if(success){
+      const terminalMeta = {
+        txId:"VV-"+randHex(10),
+        authCode:randHex(6),
+        rrn:randDigits(12),
+        cardScheme:["Visa","Mastercard","Amex"][Math.floor(Math.random()*3)],
+        last4:randDigits(4),
+        orderCode,
+      };
+      logWebhook("Transaction.Payment.Created", orderCode, "Succeeded", totals.incl);
+      openModal("刷卡终端支付", `
+        <div style="text-align:center;padding:10px 0;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2" style="margin:0 auto 12px;display:block;"><circle cx="12" cy="12" r="10"/><path d="m8 12.5 2.5 2.5L16 9.5"/></svg>
+          <div style="font-weight:700;font-size:15px;color:var(--good);">交易成功</div>
+          <div class="footnote" style="margin-top:8px;line-height:1.9;">
+            ${terminalMeta.cardScheme} •••• ${terminalMeta.last4}<br>
+            授权码 <span class="num">${terminalMeta.authCode}</span> · RRN <span class="num">${terminalMeta.rrn}</span>
+          </div>
+        </div>
+      `, []);
+      setTimeout(()=>{ closeModal(); checkoutBtn.disabled=false; finalizeSale(req, terminalMeta); }, 900);
+    } else {
+      const reason = Math.random()<0.5 ? "Card Declined" : "Terminal Timeout";
+      logWebhook("Transaction.Payment.Created", orderCode, "Failed", totals.incl);
+      openModal("刷卡终端支付", `
+        <div style="text-align:center;padding:10px 0;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--crit)" stroke-width="2" style="margin:0 auto 12px;display:block;"><circle cx="12" cy="12" r="10"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+          <div style="font-weight:700;font-size:15px;color:var(--crit);">交易失败</div>
+          <div class="footnote" style="margin-top:8px;">原因：${reason}，购物车已保留，可重试或改用其它支付方式。</div>
+        </div>
+      `, [
+        {label:"关闭", cls:"ghost", onClick:()=>{ closeModal(); checkoutBtn.disabled=false; }},
+        {label:"改为现金支付", cls:"ghost", onClick:()=>{ closeModal(); checkoutBtn.disabled=false; state.activePayment="cash"; saveState(); renderPOS(); finalizeSale(req, null); }},
+        {label:"重试刷卡", cls:"primary", onClick:()=>{ closeModal(); runTerminalPayment(req, totals); }},
+      ]);
+    }
+  }, 2500);
+}
+
+document.getElementById("checkoutBtn").addEventListener("click", ()=>{
+  if(state.cart.length===0){ showToast("购物车为空", true); return; }
+  const req = computeRequiredMaterials(state.cart);
+  const shortages = [];
+  Object.keys(req).forEach(matId=>{
+    const m = findMaterial(matId);
+    if(!m || m.stock < req[matId]) shortages.push(m ? m.name : matId);
+  });
+  const warnBox = document.getElementById("cartWarning");
+  if(shortages.length){
+    warnBox.style.display="block";
+    warnBox.textContent = "库存不足，无法结账：" + shortages.join("、");
+    return;
+  }
+
+  const totals = computeCartTotals(state.cart);
+  if(state.activePayment==="card" && state.integrations.viva.connected){
+    runTerminalPayment(req, totals);
+  } else {
+    finalizeSale(req, null);
+  }
+});
+document.getElementById("clearCartBtn").addEventListener("click", ()=>{
+  state.cart = []; saveState(); renderCart();
+});
+
+/* ============================================================
+   SALES HISTORY
+   ============================================================ */
+function renderSales(){
+  document.getElementById("salesTable").innerHTML = state.sales.map(s=>`
+    <tr>
+      <td class="num">${s.id}</td>
+      <td class="num">${fmtDateTime(s.time)}</td>
+      <td>${escapeHtml(s.clerk)}</td>
+      <td>${s.items.reduce((n,it)=>n+it.qty,0)} 件</td>
+      <td><span class="pill ${s.payment==='card'?'accent':(s.payment==='cash'?'salmon':'neutral')}">${escapeHtml(paymentLabel(s.payment))}</span></td>
+      <td class="num">${money(s.totalExcl)}</td>
+      <td class="num">${money(s.totalVat)}</td>
+      <td class="num" style="font-weight:600;">${money(s.totalIncl)}</td>
+      <td><button class="btn ghost sm" data-view-sale="${s.id}">明细</button></td>
+    </tr>`).join("");
+  document.querySelectorAll("[data-view-sale]").forEach(el=>{
+    el.addEventListener("click", ()=> openSaleModal(el.dataset.viewSale));
+  });
+}
+function openSaleModal(saleId){
+  const s = state.sales.find(x=>x.id===saleId); if(!s) return;
+  const rows = s.items.map(it=>`
+    <tr><td>${escapeHtml(it.code)} ${escapeHtml(it.name)}</td><td class="num">${it.qty}</td>
+    <td class="num">${money(it.priceExcl)}</td><td class="num">${it.vat}%</td>
+    <td class="num">${money(it.priceExcl*it.qty*(1+it.vat/100))}</td></tr>`).join("");
+  const terminalHtml = s.terminal ? `
+    <div class="footnote" style="background:var(--paper-sunken);border-radius:6px;padding:8px 10px;">
+      Viva 终端授权：${escapeHtml(s.terminal.cardScheme)} •••• ${escapeHtml(s.terminal.last4)} ·
+      授权码 <span class="num">${escapeHtml(s.terminal.authCode)}</span> ·
+      RRN <span class="num">${escapeHtml(s.terminal.rrn)}</span> ·
+      订单 <span class="num">${escapeHtml(s.terminal.orderCode)}</span>
+    </div>` : "";
+  openModal("单据 "+s.id, `
+    <div class="footnote">${fmtDateTime(s.time)} · 收银员 ${escapeHtml(s.clerk)} · ${escapeHtml(paymentLabel(s.payment))}</div>
+    ${terminalHtml}
+    <div class="table-wrap"><table><thead><tr><th>商品</th><th>数量</th><th>单价</th><th>VAT</th><th>小计</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>
+    <div class="totals-row grand"><span>含税合计</span><span class="num">${money(s.totalIncl)}</span></div>
+  `, [{label:"关闭", cls:"ghost", onClick:closeModal}]);
+}
+
+/* ============================================================
+   PRODUCTS
+   ============================================================ */
+function renderProducts(){
+  document.getElementById("productsTable").innerHTML = state.products.map(p=>`
+    <tr>
+      <td class="num">${escapeHtml(p.code)}</td>
+      <td style="font-weight:600;">${escapeHtml(p.name)}</td>
+      <td><span class="pill neutral">${escapeHtml(p.group)}</span></td>
+      <td class="num">${num(p.vat,1)} %</td>
+      <td class="num">${money(p.priceExcl)}</td>
+      <td class="num" style="font-weight:600;">${money(priceIncl(p))}</td>
+      <td>${p.bom.map(([mid,q])=>{ const m=findMaterial(mid); return m? `<span class="pill neutral" title="${num(q,3)} ${m.unit}/份">${escapeHtml(m.name.split(" (")[0])}</span>`:""; }).join(" ")}</td>
+      <td><button class="btn ghost sm" data-edit-product="${p.id}">编辑</button></td>
+    </tr>`).join("");
+  document.querySelectorAll("[data-edit-product]").forEach(el=>{
+    el.addEventListener("click", ()=> openProductModal(el.dataset.editProduct));
+  });
+}
+
+function openProductModal(productId){
+  const isNew = !productId;
+  const p = isNew ? {id:null, code:"", name:"", group:state.products[0].group, vat:13.5, priceExcl:0.88, bom:[]} : findProduct(productId);
+  const groups = [...new Set(state.products.map(x=>x.group))];
+  let bomDraft = p.bom.map(([mid,qty])=>({mid,qty}));
+
+  function bomRowsHtml(){
+    return bomDraft.map((row,idx)=>`
+      <div class="bom-row" data-bom-idx="${idx}">
+        <select data-bom-mat>${state.materials.map(m=>`<option value="${m.id}" ${m.id===row.mid?"selected":""}>${escapeHtml(m.name)}</option>`).join("")}</select>
+        <input data-bom-qty type="number" step="0.001" min="0" value="${row.qty}">
+        <button class="btn ghost sm" data-bom-del type="button" title="移除">✕</button>
+      </div>`).join("");
+  }
+
+  const bodyHtml = `
+    <div class="field-row">
+      <div class="field"><label>产品编号</label><input id="fCode" type="text" value="${escapeHtml(p.code)}"></div>
+      <div class="field"><label>分类</label>
+        <select id="fGroup">${groups.map(g=>`<option ${g===p.group?"selected":""}>${escapeHtml(g)}</option>`).join("")}</select>
+      </div>
+    </div>
+    <div class="field"><label>产品名称</label><input id="fName" type="text" value="${escapeHtml(p.name)}"></div>
+    <div class="field-row">
+      <div class="field"><label>不含税单价 (€)</label><input id="fPrice" type="number" step="0.01" min="0" value="${p.priceExcl}"></div>
+      <div class="field"><label>VAT 税率 (%)</label>
+        <select id="fVat">${state.vatRates.map(v=>`<option value="${v.rate}" ${v.rate===p.vat?"selected":""}>${v.rate}% — ${escapeHtml(v.label)}</option>`).join("")}</select>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section-title"><h3 style="font-size:13px;">BOM 用料配方</h3><span class="hint">结账时按此配方扣减库存</span></div>
+    <div class="bom-list" id="bomList">${bomRowsHtml()}</div>
+    <button class="btn ghost sm" id="addBomRow" type="button" style="align-self:flex-start;">+ 添加原材料</button>
+  `;
+
+  const footButtons = [
+    {label:"取消", cls:"ghost", onClick:closeModal},
+  ];
+  if(!isNew){
+    footButtons.push({label:"删除产品", cls:"danger", onClick:()=>{
+      state.products = state.products.filter(x=>x.id!==p.id);
+      saveState(); closeModal(); renderProducts(); showToast("已删除产品");
+    }});
+  }
+  footButtons.push({label:isNew?"创建产品":"保存修改", cls:"primary", onClick:()=>{
+    const code = document.getElementById("fCode").value.trim();
+    const name = document.getElementById("fName").value.trim();
+    if(!code || !name){ showToast("请填写产品编号与名称", true); return; }
+    const group = document.getElementById("fGroup").value;
+    const priceExcl = parseFloat(document.getElementById("fPrice").value)||0;
+    const vat = parseFloat(document.getElementById("fVat").value)||0;
+    const bom = bomDraft.filter(r=>r.qty>0).map(r=>[r.mid, r.qty]);
+    if(isNew){
+      const id = "p"+(state.products.length+1)+"_"+Date.now();
+      state.products.push({id, code, name, group, vat, priceExcl, bom});
+    } else {
+      Object.assign(p, {code, name, group, vat, priceExcl, bom});
+    }
+    saveState(); closeModal(); renderProducts();
+    showToast(isNew?"产品已创建":"产品已更新");
+  }});
+
+  openModal(isNew?"新建产品":"编辑产品 · "+p.name, bodyHtml, footButtons);
+
+  function bindBomEvents(){
+    document.querySelectorAll("[data-bom-mat]").forEach((el,idx)=> el.addEventListener("change", ()=>{ bomDraft[idx].mid = el.value; }));
+    document.querySelectorAll("[data-bom-qty]").forEach((el,idx)=> el.addEventListener("input", ()=>{ bomDraft[idx].qty = parseFloat(el.value)||0; }));
+    document.querySelectorAll("[data-bom-del]").forEach((el)=> el.addEventListener("click", ()=>{
+      const idx = parseInt(el.closest("[data-bom-idx]").dataset.bomIdx,10);
+      bomDraft.splice(idx,1);
+      document.getElementById("bomList").innerHTML = bomRowsHtml();
+      bindBomEvents();
+    }));
+  }
+  bindBomEvents();
+  document.getElementById("addBomRow").addEventListener("click", ()=>{
+    bomDraft.push({mid: state.materials[0].id, qty:0.01});
+    document.getElementById("bomList").innerHTML = bomRowsHtml();
+    bindBomEvents();
+  });
+}
+document.getElementById("addProductBtn").addEventListener("click", ()=> openProductModal(null));
+
+/* ============================================================
+   INVENTORY
+   ============================================================ */
+function renderInventory(){
+  document.getElementById("inventoryTable").innerHTML = state.materials.map(m=>`
+    <tr>
+      <td style="font-weight:600;">${escapeHtml(m.name)}</td>
+      <td>${escapeHtml(m.unit)}</td>
+      <td class="num">${num(m.stock,3)}</td>
+      <td class="num">${num(m.threshold,3)}</td>
+      <td class="num">${money(m.cost)}</td>
+      <td><span class="pill ${stockStatus(m)}">${stockStatus(m)==="crit"?"紧急":(stockStatus(m)==="warn"?"偏低":"正常")}</span></td>
+      <td><button class="btn ghost sm" data-restock="${m.id}">入库 / 调整</button></td>
+    </tr>`).join("");
+  document.querySelectorAll("[data-restock]").forEach(el=>{
+    el.addEventListener("click", ()=> openRestockModal(el.dataset.restock));
+  });
+}
+function openRestockModal(matId){
+  const m = findMaterial(matId); if(!m) return;
+  openModal("入库 / 库存调整 · "+m.name, `
+    <div class="footnote">当前库存：<span class="num">${num(m.stock,3)} ${m.unit}</span></div>
+    <div class="field"><label>调整方式</label>
+      <select id="rMode"><option value="add">采购入库（增加）</option><option value="set">盘点校正（设为）</option></select>
+    </div>
+    <div class="field"><label>数量 (${escapeHtml(m.unit)})</label><input id="rQty" type="number" step="0.001" min="0" value="0"></div>
+    <div class="field"><label>备注（可选）</label><input id="rNote" type="text" placeholder="例如：Kespro 周三配送"></div>
+  `, [
+    {label:"取消", cls:"ghost", onClick:closeModal},
+    {label:"确认", cls:"primary", onClick:()=>{
+      const mode = document.getElementById("rMode").value;
+      const qty = parseFloat(document.getElementById("rQty").value)||0;
+      m.stock = mode==="add" ? Math.round((m.stock+qty)*1000)/1000 : Math.round(qty*1000)/1000;
+      saveState(); closeModal(); renderInventory(); updateNavBadges();
+      showToast("库存已更新："+m.name);
+    }}
+  ]);
+}
+
+/* ============================================================
+   INVOICES / TAXHACKER
+   ============================================================ */
+function receiptApiPillClass(status){
+  return status==="ok" ? "ok" : status==="warn" ? "warn" : status==="error" ? "crit" : "neutral";
+}
+function receiptApiPillText(status, model){
+  if(status==="ok") return "已连接" + (model ? " · "+model : "");
+  if(status==="warn") return "已连接，缺少 API Key";
+  if(status==="error") return "无法连接";
+  return "未测试";
+}
+
+function renderInvoices(){
+  document.getElementById("receiptApiBaseInput").value = state.settings.receiptApiBase || "";
+  const apiPill = document.getElementById("receiptApiStatusPill");
+  apiPill.className = "pill " + receiptApiPillClass(state.settings.receiptApiStatus);
+  apiPill.textContent = receiptApiPillText(state.settings.receiptApiStatus, state.settings.receiptApiModel);
+
+  const list = [...state.invoices].sort((a,b)=> new Date(b.uploadedAt)-new Date(a.uploadedAt));
+  document.getElementById("invoiceCountHint").textContent = state.invoices.length+" 张发票 · "+state.invoices.filter(i=>i.status==="pending").length+" 待确认";
+  document.getElementById("invoiceGrid").innerHTML = list.map(inv=>`
+    <div class="invoice-card" data-open-invoice="${inv.id}">
+      <div class="invoice-thumb" ${inv.thumb?`style="background-image:url('${inv.thumb}')"`:""}>
+        ${inv.thumb?"":`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 2.5h8l4 4V20a1.3 1.3 0 0 1-1.3 1.3H7A1.3 1.3 0 0 1 5.7 20V3.8A1.3 1.3 0 0 1 7 2.5Z"/></svg>`}
+      </div>
+      ${inv.status==="processing" ? `<div style="display:flex;align-items:center;gap:8px;"><div class="spinner"></div><span class="footnote">解析中…</span></div>` : `
+      <div class="vendor">${inv.vendor ? escapeHtml(inv.vendor) : `<span style="color:var(--crit);">供应商未识别</span>`}</div>
+      ${inv.item ? `<div class="meta" style="font-family:var(--font-body);">${escapeHtml(inv.item)}</div>` : ""}
+      <div class="meta">${fmtDate(inv.date)} · ${escapeHtml(inv.category)}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span class="amt">${money(inv.amountExcl*(1+inv.vatRate/100))}</span>
+        <span class="pill ${inv.status==='approved'?'ok':(inv.status==='pending'?'warn':'crit')}">${inv.status==='approved'?'已确认':(inv.status==='pending'?'待确认':'已拒绝')}</span>
+      </div>`}
+    </div>`).join("");
+  document.querySelectorAll("[data-open-invoice]").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      const inv = state.invoices.find(i=>i.id===el.dataset.openInvoice);
+      if(inv && inv.status!=="processing") openInvoiceModal(inv.id);
+    });
+  });
+}
+
+const KNOWN_VENDOR_HINTS = [
+  "K-Citymarket","K-Supermarket","K-Market","K-Extra",
+  "S-market","Sale","Alepa","Prisma","Lidl",
+  "Kespro","Meira Nova","Foodela","Metro Tukku","Metro","HFC","Suomen Kalatukku",
+];
+
+function parseFilenameHints(filename){
+  const base = filename.replace(/\.[a-z0-9]{2,5}$/i, "");
+
+  let vendor = "";
+  for(const v of KNOWN_VENDOR_HINTS){
+    if(base.toLowerCase().includes(v.toLowerCase())){ vendor = v; break; }
+  }
+
+  let dateIso = null;
+  const dateMatch = base.match(/(\d{1,2})[.\-_](\d{1,2})[.\-_](\d{4})/);
+  if(dateMatch){
+    const dd = +dateMatch[1], mm = +dateMatch[2], yyyy = +dateMatch[3];
+    if(dd>=1 && dd<=31 && mm>=1 && mm<=12){
+      dateIso = new Date(yyyy, mm-1, dd, 12, 0, 0).toISOString();
+    }
+  }
+
+  let amount = null;
+  const amtMatches = [...base.matchAll(/\d+[.,]\d{2}/g)];
+  if(amtMatches.length){
+    let picked = amtMatches.find(m => base.slice(m.index+m[0].length, m.index+m[0].length+2).includes("€"));
+    if(!picked) picked = amtMatches[amtMatches.length-1];
+    amount = parseFloat(picked[0].replace(",", "."));
+  }
+
+  return {vendor, dateIso, amount};
+}
+
+function handleFiles(files){
+  Array.from(files).forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const seq = state.nextInvoiceSeq++;
+      const id = "INV-"+String(seq).padStart(6,"0");
+      const invoice = {
+        id, filename:file.name, thumb:e.target.result,
+        status:"processing", vendor:"", item:"", date:new Date().toISOString(),
+        amountExcl:0, vatRate:13.5, category:"", note:"",
+        uploadedAt:new Date().toISOString(),
+      };
+      state.invoices.unshift(invoice);
+      saveState();
+      if(document.getElementById("view-invoices").classList.contains("active")) renderInvoices();
+      updateNavBadges();
+
+      runExtraction(invoice, file);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function extractReceiptViaBackend(file){
+  const base = (state.settings.receiptApiBase||"").trim().replace(/\/+$/,"");
+  if(!base) throw new Error("未配置识别后端地址");
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), 20000);
+  try{
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(base+"/api/receipts/extract", {method:"POST", body:formData, signal:controller.signal});
+    if(!res.ok){
+      let detail = "";
+      try{ detail = (await res.json()).detail || ""; }catch(e){}
+      throw new Error(detail || ("HTTP "+res.status));
+    }
+    return await res.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function applyBackendResult(invoice, result){
+  const items = Array.isArray(result.items) ? result.items : [];
+  const itemSummary = items.map(it => it.price!=null ? `${it.name}（${money(it.price)}）` : it.name).join("、");
+  const vatRate = 13.5;
+  const amountExcl = result.total_amount!=null ? Math.round((result.total_amount/(1+vatRate/100))*100)/100 : 0;
+  const note = result.warning
+    ? ("Gemini 未能确定："+result.warning+"，请核对后再确认入账")
+    : "已由 Gemini 从图片中识别，请核对后确认入账";
+  Object.assign(invoice, {
+    status:"pending",
+    vendor: result.store_name || "",
+    item: itemSummary,
+    date: result.date ? new Date(result.date+"T12:00:00").toISOString() : new Date().toISOString(),
+    amountExcl, vatRate,
+    category: state.invoiceCategories[0],
+    note,
+  });
+  showToast(result.store_name ? ("Gemini 已识别："+result.store_name) : "Gemini 未能识别供应商，请核对", !result.store_name);
+}
+
+function applyFilenameFallback(invoice, file, err){
+  const hints = parseFilenameHints(file.name);
+  const matched = [];
+  if(hints.vendor) matched.push("供应商");
+  if(hints.dateIso) matched.push("日期");
+  if(hints.amount!=null) matched.push("金额");
+  const vatRate = 13.5;
+  const amountExcl = hints.amount!=null ? Math.round((hints.amount/(1+vatRate/100))*100)/100 : 0;
+  const reason = (err && err.message) ? err.message : "无法连接识别后端";
+  const note = "识别后端不可用（"+reason+"）"
+    + (matched.length ? "，已从文件名解析：" + matched.join("、") : "，且未能从文件名解析到有效信息")
+    + "，请核对/手动填写后再确认入账";
+  Object.assign(invoice, {
+    status:"pending",
+    vendor: hints.vendor,
+    item: "",
+    date: hints.dateIso || new Date().toISOString(),
+    amountExcl, vatRate,
+    category: state.invoiceCategories[0],
+    note,
+  });
+  showToast("识别后端不可用，已改用文件名解析兜底", true);
+}
+
+async function runExtraction(invoice, file){
+  try{
+    const result = await extractReceiptViaBackend(file);
+    applyBackendResult(invoice, result);
+  }catch(err){
+    applyFilenameFallback(invoice, file, err);
+  }
+  saveState();
+  if(document.getElementById("view-invoices").classList.contains("active")) renderInvoices();
+  updateNavBadges();
+}
+
+const dropzone = document.getElementById("dropzone");
+const fileInput = document.getElementById("fileInput");
+dropzone.addEventListener("click", ()=> fileInput.click());
+fileInput.addEventListener("change", ()=>{ if(fileInput.files.length) handleFiles(fileInput.files); fileInput.value=""; });
+["dragenter","dragover"].forEach(ev=> dropzone.addEventListener(ev, e=>{ e.preventDefault(); dropzone.classList.add("drag"); }));
+["dragleave","drop"].forEach(ev=> dropzone.addEventListener(ev, e=>{ e.preventDefault(); dropzone.classList.remove("drag"); }));
+dropzone.addEventListener("drop", e=>{ if(e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
+
+document.getElementById("receiptApiSaveBtn").addEventListener("click", ()=>{
+  state.settings.receiptApiBase = document.getElementById("receiptApiBaseInput").value.trim();
+  saveState();
+  showToast("已保存后端地址");
+});
+
+document.getElementById("receiptApiTestBtn").addEventListener("click", async ()=>{
+  const base = document.getElementById("receiptApiBaseInput").value.trim().replace(/\/+$/,"");
+  const pill = document.getElementById("receiptApiStatusPill");
+  if(!base){ showToast("请输入后端地址", true); return; }
+  pill.className = "pill neutral";
+  pill.textContent = "测试中…";
+  try{
+    const controller = new AbortController();
+    const timer = setTimeout(()=>controller.abort(), 6000);
+    const res = await fetch(base+"/health", {signal:controller.signal});
+    clearTimeout(timer);
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const data = await res.json();
+    state.settings.receiptApiBase = base;
+    state.settings.receiptApiModel = data.model || "";
+    if(data.configured){
+      state.settings.receiptApiStatus = "ok";
+      showToast("连接成功，模型："+(data.model||"未知"));
+    } else {
+      state.settings.receiptApiStatus = "warn";
+      showToast("后端已连接，但服务器未配置 GOOGLE_API_KEY", true);
+    }
+  }catch(err){
+    state.settings.receiptApiStatus = "error";
+    showToast("连接失败："+err.message, true);
+  }
+  saveState();
+  pill.className = "pill " + receiptApiPillClass(state.settings.receiptApiStatus);
+  pill.textContent = receiptApiPillText(state.settings.receiptApiStatus, state.settings.receiptApiModel);
+});
+
+function openInvoiceModal(invId){
+  const inv = state.invoices.find(i=>i.id===invId); if(!inv) return;
+  const bodyHtml = `
+    ${inv.thumb ? `<div class="invoice-thumb" style="height:150px;background-image:url('${inv.thumb}')"></div>` : ""}
+    <div class="footnote">${escapeHtml(inv.filename)} · 上传于 ${fmtDateTime(inv.uploadedAt)}</div>
+    <div class="footnote" style="background:var(--warn-soft);color:var(--warn);border-radius:6px;padding:8px 10px;">${escapeHtml(inv.note||"演示环境无法读取图片内容，请核对以下字段")}</div>
+    <div class="field-row">
+      <div class="field"><label>供应商</label><input id="iVendor" type="text" placeholder="未识别，请手动填写" value="${escapeHtml(inv.vendor)}"></div>
+      <div class="field"><label>发票日期</label><input id="iDate" type="date" value="${inv.date.slice(0,10)}"></div>
+    </div>
+    <div class="field"><label>商品 / 用途说明</label><input id="iItem" type="text" placeholder="例如：三文鱼柳 2.7kg（可手动填写）" value="${escapeHtml(inv.item||"")}"></div>
+    <div class="field-row">
+      <div class="field"><label>不含税金额 (€)</label><input id="iAmount" type="number" step="0.01" min="0" value="${inv.amountExcl}"></div>
+      <div class="field"><label>VAT 税率</label>
+        <select id="iVat">${state.vatRates.map(v=>`<option value="${v.rate}" ${v.rate===inv.vatRate?"selected":""}>${v.rate}% — ${escapeHtml(v.label)}</option>`).join("")}</select>
+      </div>
+    </div>
+    <div class="field"><label>费用分类</label>
+      <select id="iCategory">${state.invoiceCategories.map(c=>`<option ${c===inv.category?"selected":""}>${escapeHtml(c)}</option>`).join("")}</select>
+    </div>
+    <div class="field"><label>备注</label><input id="iNote" type="text" value="${escapeHtml(inv.note||"")}"></div>
+    <div id="iCalc" class="footnote"></div>
+  `;
+  openModal("发票详情 · "+inv.id, bodyHtml, [
+    {label:"删除", cls:"danger", onClick:()=>{
+      state.invoices = state.invoices.filter(i=>i.id!==inv.id);
+      saveState(); closeModal(); renderInvoices(); updateNavBadges();
+    }},
+    {label:"存为草稿", cls:"ghost", onClick:()=> saveInvoiceEdits(inv, "pending", true)},
+    {label:inv.status==="approved"?"已确认":"确认入账", cls:"primary", onClick:()=> saveInvoiceEdits(inv, "approved", true)},
+  ]);
+  function recalc(){
+    const amt = parseFloat(document.getElementById("iAmount").value)||0;
+    const vat = parseFloat(document.getElementById("iVat").value)||0;
+    document.getElementById("iCalc").textContent = "含税总额："+money(amt*(1+vat/100))+"（进项税额 "+money(amt*vat/100)+"）";
+  }
+  ["iAmount","iVat"].forEach(id=> document.getElementById(id).addEventListener("input", recalc));
+  recalc();
+}
+function saveInvoiceEdits(inv, status, close){
+  inv.vendor = document.getElementById("iVendor").value.trim() || inv.vendor;
+  inv.item = document.getElementById("iItem").value.trim();
+  inv.date = document.getElementById("iDate").value ? new Date(document.getElementById("iDate").value).toISOString() : inv.date;
+  inv.amountExcl = parseFloat(document.getElementById("iAmount").value)||0;
+  inv.vatRate = parseFloat(document.getElementById("iVat").value)||0;
+  inv.category = document.getElementById("iCategory").value;
+  inv.note = document.getElementById("iNote").value.trim();
+  inv.status = status;
+  saveState();
+  if(close) closeModal();
+  renderInvoices(); updateNavBadges();
+  showToast(status==="approved" ? "发票已确认入账" : "已保存");
+}
+
+/* ============================================================
+   REPORTS
+   ============================================================ */
+function salesInRange(days){
+  if(days==="all") return state.sales;
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-parseInt(days,10));
+  return state.sales.filter(s=> new Date(s.time) >= cutoff);
+}
+function renderReports(){
+  const range = document.getElementById("reportRange").value;
+  const sales = salesInRange(range);
+
+  const outputVat = sales.reduce((s,x)=>s+x.totalVat,0);
+  const inputVat = state.invoices.filter(i=>i.status==="approved").reduce((s,i)=>s+i.amountExcl*(i.vatRate/100),0);
+  const net = outputVat - inputVat;
+  document.getElementById("repOutputVat").textContent = money(outputVat);
+  document.getElementById("repInputVat").textContent = money(inputVat);
+  document.getElementById("repNetVat").textContent = money(Math.abs(net));
+  document.getElementById("repNetVatNote").textContent = net>=0 ? "本期应缴纳增值税" : "本期可申请退税";
+
+  const hourAgg = new Array(24).fill(0);
+  state.sales.forEach(s=>{ hourAgg[new Date(s.time).getHours()] += s.totalIncl; });
+  const maxHour = Math.max(1, ...hourAgg);
+  const shownHours = []; for(let h=9; h<=21; h++) shownHours.push(h);
+  document.getElementById("hourChart").innerHTML = shownHours.map(h=>{
+    const v = hourAgg[h];
+    const pct = Math.max(2,(v/maxHour*100));
+    return `<div class="hourbar ${v===maxHour&&v>0?'peak':''}" style="height:${pct}%">${v>0?`<span>${money(v).replace(' €','')}</span>`:""}</div>`;
+  }).join("");
+  document.getElementById("hourLabels").innerHTML = shownHours.map(h=>`<div>${h}</div>`).join("");
+
+  const groupAgg = {};
+  sales.forEach(s=> s.items.forEach(it=>{
+    groupAgg[it.group] = (groupAgg[it.group]||0) + it.priceExcl*it.qty*(1+it.vat/100);
+  }));
+  const totalGroup = Math.max(1, Object.values(groupAgg).reduce((a,b)=>a+b,0));
+  const groupEntries = Object.entries(groupAgg).sort((a,b)=>b[1]-a[1]);
+  document.getElementById("groupBars").innerHTML = groupEntries.length ? groupEntries.map(([g,v])=>`
+    <div class="bar-row">
+      <div class="name">${escapeHtml(g)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(v/totalGroup*100).toFixed(1)}%"></div></div>
+      <div class="val num">${(v/totalGroup*100).toFixed(0)}%</div>
+    </div>`).join("") : `<p class="footnote">所选范围内暂无销售数据。</p>`;
+
+  const prodAgg = {};
+  sales.forEach(s=> s.items.forEach(it=>{
+    prodAgg[it.productId] = prodAgg[it.productId] || {name:it.name, code:it.code, group:it.group, qty:0, revenue:0};
+    prodAgg[it.productId].qty += it.qty;
+    prodAgg[it.productId].revenue += it.priceExcl*it.qty*(1+it.vat/100);
+  }));
+  const topProd = Object.values(prodAgg).sort((a,b)=>b.revenue-a.revenue).slice(0,10);
+  document.getElementById("topProductsTable").innerHTML = topProd.length ? topProd.map((x,i)=>`
+    <tr><td class="num">${i+1}</td><td style="font-weight:600;">${escapeHtml(x.code)} ${escapeHtml(x.name)}</td>
+    <td><span class="pill neutral">${escapeHtml(x.group)}</span></td><td class="num">${x.qty}</td><td class="num">${money(x.revenue)}</td></tr>`).join("")
+    : `<tr><td colspan="5" class="footnote">所选范围内暂无销售数据。</td></tr>`;
+}
+document.getElementById("reportRange").addEventListener("change", renderReports);
+
+/* ============================================================
+   SETTINGS
+   ============================================================ */
+function renderSettings(){
+  document.getElementById("setShopName").value = state.settings.shopName;
+  document.getElementById("setCompanyName").value = state.settings.companyName;
+  document.getElementById("setBizId").value = state.settings.bizId;
+  document.getElementById("setCity").value = state.settings.city;
+  document.getElementById("vatRatesTable").innerHTML = state.vatRates.map(v=>`
+    <tr><td>${escapeHtml(v.label)}</td><td class="num" style="font-weight:600;">${num(v.rate,1)} %</td></tr>`).join("");
+  document.getElementById("clerkTags").innerHTML = state.clerks.map(c=>`
+    <span class="tag-chip">${escapeHtml(c)}<button data-del-clerk="${escapeHtml(c)}" type="button" aria-label="移除">✕</button></span>`).join("");
+  document.querySelectorAll("[data-del-clerk]").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      state.clerks = state.clerks.filter(c=>c!==el.dataset.delClerk);
+      if(state.activeClerk===el.dataset.delClerk) state.activeClerk = state.clerks[0]||"";
+      saveState(); renderSettings();
+    });
+  });
+
+  const term = state.integrations.viva;
+  document.getElementById("setVivaClientId").value = term.clientId;
+  document.getElementById("setVivaClientSecret").value = term.clientSecret;
+  document.getElementById("setVivaMerchantId").value = term.merchantId;
+  document.getElementById("setVivaTerminalId").value = term.terminalId;
+  document.getElementById("setVivaWebhook").value = "https://api."+state.settings.shopName.toLowerCase().replace(/[^a-z0-9]+/g,"-")+".local/webhooks/viva";
+  const vivaPill = document.getElementById("vivaStatusPill");
+  const connectBtn = document.getElementById("vivaConnectBtn");
+  if(term.connected){
+    vivaPill.className = "pill ok"; vivaPill.textContent = "已连接";
+    connectBtn.textContent = "断开连接"; connectBtn.className = "btn danger";
+  } else {
+    vivaPill.className = "pill crit"; vivaPill.textContent = "未连接";
+    connectBtn.textContent = "连接终端"; connectBtn.className = "btn primary";
+  }
+  renderWebhookLog();
+}
+
+function renderWebhookLog(){
+  document.getElementById("webhookLogTable").innerHTML = state.webhookLog.length ? state.webhookLog.map(w=>`
+    <tr>
+      <td class="num">${fmtDateTime(w.time)}</td>
+      <td>${escapeHtml(w.event)}</td>
+      <td class="num">${escapeHtml(w.orderCode)}</td>
+      <td><span class="pill ${w.status==='Succeeded'||w.status==='OK'?'ok':(w.status==='Pending'?'warn':'crit')}">${escapeHtml(w.status)}</span></td>
+    </tr>`).join("") : `<tr><td colspan="4" class="footnote">暂无 Webhook 事件。</td></tr>`;
+}
+document.getElementById("saveSettingsBtn").addEventListener("click", ()=>{
+  state.settings.shopName = document.getElementById("setShopName").value.trim();
+  state.settings.companyName = document.getElementById("setCompanyName").value.trim();
+  state.settings.bizId = document.getElementById("setBizId").value.trim();
+  state.settings.city = document.getElementById("setCity").value.trim();
+  saveState();
+  document.getElementById("topbarSub").textContent = state.settings.shopName+" · "+state.settings.companyName;
+  showToast("设置已保存");
+});
+document.getElementById("addClerkBtn").addEventListener("click", ()=>{
+  const input = document.getElementById("newClerkInput");
+  const name = input.value.trim();
+  if(!name) return;
+  if(!state.clerks.includes(name)) state.clerks.push(name);
+  input.value="";
+  saveState(); renderSettings();
+});
+
+document.getElementById("vivaConnectBtn").addEventListener("click", ()=>{
+  const term = state.integrations.viva;
+  if(term.connected){
+    term.connected = false;
+    saveState(); renderSettings(); renderPOS();
+    showToast("已断开读卡终端连接");
+    return;
+  }
+  const clientId = document.getElementById("setVivaClientId").value.trim();
+  const clientSecret = document.getElementById("setVivaClientSecret").value.trim();
+  const merchantId = document.getElementById("setVivaMerchantId").value.trim();
+  const terminalId = document.getElementById("setVivaTerminalId").value.trim();
+  if(!clientId || !clientSecret || !merchantId || !terminalId){
+    showToast("请填写完整的 Client ID / Secret / Merchant ID / Terminal ID", true);
+    return;
+  }
+  Object.assign(term, {connected:true, clientId, clientSecret, merchantId, terminalId});
+  saveState();
+  logWebhook("Webhook.Verified", "—", "OK", null);
+  renderSettings(); renderPOS();
+  showToast("读卡终端已连接，Webhook 校验成功");
+});
+
+/* ============================================================
+   Theme toggle
+   ============================================================ */
+function applyTheme(){
+  if(state.theme==="light") document.documentElement.setAttribute("data-theme","light");
+  else if(state.theme==="dark") document.documentElement.setAttribute("data-theme","dark");
+  else document.documentElement.removeAttribute("data-theme");
+}
+document.getElementById("themeToggle").addEventListener("click", ()=>{
+  state.theme = state.theme==="system" ? "light" : (state.theme==="light" ? "dark" : "system");
+  applyTheme(); saveState();
+  showToast("主题："+(state.theme==="system"?"跟随系统":(state.theme==="light"?"浅色":"深色")));
+});
+
+/* ============================================================
+   Clock
+   ============================================================ */
+function tickClock(){
+  const d = new Date();
+  const pad = x=>String(x).padStart(2,"0");
+  document.getElementById("clock").textContent = pad(d.getDate())+"."+pad(d.getMonth()+1)+"."+d.getFullYear()+"  "+pad(d.getHours())+":"+pad(d.getMinutes());
+}
+
+/* ============================================================
+   Init
+   ============================================================ */
+state = loadState();
+applyTheme();
+document.getElementById("topbarSub").textContent = state.settings.shopName+" · "+state.settings.companyName;
+tickClock(); setInterval(tickClock, 15000);
+switchView(state.view || "dashboard");
+
+})();
+</script>
