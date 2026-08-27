@@ -653,11 +653,11 @@ tbody tr:hover{background:var(--paper-sunken);}
       <div class="card card-pad">
         <div class="dropzone" id="dropzone">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4 7 9M12 4l5 5"/><path d="M4 16v2.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V16"/></svg>
-          <b>拖拽小票 / 发票图片到此处，或点击上传</b>
-          <span>支持 JPG · PNG</span>
+          <b>拖拽小票 / 发票图片或 PDF 到此处，或点击上传</b>
+          <span>支持 JPG · PNG · PDF</span>
         </div>
-        <input type="file" id="fileInput" accept="image/*" multiple style="display:none;">
-        <p class="footnote" style="margin-top:12px;">本演示为纯前端原型，浏览器沙箱无法访问外部 AI 接口，因此无法读取图片像素内容（如小票上的商品名称、金额印刷字样）——系统只能尝试从<b>文件名</b>解析供应商 / 日期 / 金额线索，识别不到时会明确提示需要手动填写。正式对接 TaxHacker 后端会调用真实的 OCR + 大模型视觉识别接口，直接从图片中提取这些字段。</p>
+        <input type="file" id="fileInput" accept="image/*,.pdf,application/pdf" multiple style="display:none;">
+        <p class="footnote" style="margin-top:12px;">若上方「识别后端」已连接，图片或 PDF 会真正发给 Gemini 识别小票/发票内容（商品名称、金额、供应商等）。未连接、连接失败或超时时会自动回退：只能从<b>文件名</b>解析供应商 / 日期 / 金额线索，识别不到时会明确提示需要手动填写——claude.ai Artifact 沙箱本身无法访问外部接口，只有自托管页面才能真正连通后端。</p>
       </div>
 
       <div class="section-title"><h3>发票清单</h3><span class="hint" id="invoiceCountHint"></span></div>
@@ -1671,6 +1671,21 @@ function receiptApiPillText(status, model){
   return "未测试";
 }
 
+function invoiceThumbHtml(inv, heightPx){
+  if(inv.fileType==="pdf"){
+    return `<div class="invoice-thumb" style="height:${heightPx}px;flex-direction:column;gap:4px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 2.5h8l4 4V20a1.3 1.3 0 0 1-1.3 1.3H7A1.3 1.3 0 0 1 5.7 20V3.8A1.3 1.3 0 0 1 7 2.5Z"/><path d="M14.5 2.7V7a1 1 0 0 0 1 1h4.3"/></svg>
+      <span style="font-size:10px;font-weight:700;letter-spacing:.04em;">PDF</span>
+    </div>`;
+  }
+  if(inv.thumb){
+    return `<div class="invoice-thumb" style="height:${heightPx}px;background-image:url('${inv.thumb}')"></div>`;
+  }
+  return `<div class="invoice-thumb" style="height:${heightPx}px;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 2.5h8l4 4V20a1.3 1.3 0 0 1-1.3 1.3H7A1.3 1.3 0 0 1 5.7 20V3.8A1.3 1.3 0 0 1 7 2.5Z"/></svg>
+  </div>`;
+}
+
 function renderInvoices(){
   document.getElementById("receiptApiBaseInput").value = state.settings.receiptApiBase || "";
   const apiPill = document.getElementById("receiptApiStatusPill");
@@ -1681,9 +1696,7 @@ function renderInvoices(){
   document.getElementById("invoiceCountHint").textContent = state.invoices.length+" 张发票 · "+state.invoices.filter(i=>i.status==="pending").length+" 待确认";
   document.getElementById("invoiceGrid").innerHTML = list.map(inv=>`
     <div class="invoice-card" data-open-invoice="${inv.id}">
-      <div class="invoice-thumb" ${inv.thumb?`style="background-image:url('${inv.thumb}')"`:""}>
-        ${inv.thumb?"":`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 2.5h8l4 4V20a1.3 1.3 0 0 1-1.3 1.3H7A1.3 1.3 0 0 1 5.7 20V3.8A1.3 1.3 0 0 1 7 2.5Z"/></svg>`}
-      </div>
+      ${invoiceThumbHtml(inv, 86)}
       ${inv.status==="processing" ? `<div style="display:flex;align-items:center;gap:8px;"><div class="spinner"></div><span class="footnote">解析中…</span></div>` : `
       <div class="vendor">${inv.vendor ? escapeHtml(inv.vendor) : `<span style="color:var(--crit);">供应商未识别</span>`}</div>
       ${inv.item ? `<div class="meta" style="font-family:var(--font-body);">${escapeHtml(inv.item)}</div>` : ""}
@@ -1737,24 +1750,35 @@ function parseFilenameHints(filename){
 
 function handleFiles(files){
   Array.from(files).forEach(file=>{
-    const reader = new FileReader();
-    reader.onload = function(e){
-      const seq = state.nextInvoiceSeq++;
-      const id = "INV-"+String(seq).padStart(6,"0");
-      const invoice = {
-        id, filename:file.name, thumb:e.target.result,
-        status:"processing", vendor:"", item:"", date:new Date().toISOString(),
-        amountExcl:0, vatRate:13.5, category:"", note:"",
-        uploadedAt:new Date().toISOString(),
-      };
-      state.invoices.unshift(invoice);
-      saveState();
-      if(document.getElementById("view-invoices").classList.contains("active")) renderInvoices();
-      updateNavBadges();
-
-      runExtraction(invoice, file);
+    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+    const seq = state.nextInvoiceSeq++;
+    const id = "INV-"+String(seq).padStart(6,"0");
+    const invoice = {
+      id, filename:file.name, thumb:null, fileType: isPdf ? "pdf" : "image",
+      status:"processing", vendor:"", item:"", date:new Date().toISOString(),
+      amountExcl:0, vatRate:13.5, category:"", note:"",
+      uploadedAt:new Date().toISOString(),
     };
-    reader.readAsDataURL(file);
+    state.invoices.unshift(invoice);
+    saveState();
+    if(document.getElementById("view-invoices").classList.contains("active")) renderInvoices();
+    updateNavBadges();
+
+    if(isPdf){
+      // Skip the base64 thumbnail for PDFs — CSS can't render a PDF as a
+      // background image, and multi-page PDFs can be large enough to blow
+      // through localStorage's per-origin quota.
+      runExtraction(invoice, file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = function(e){
+        invoice.thumb = e.target.result;
+        saveState();
+        if(document.getElementById("view-invoices").classList.contains("active")) renderInvoices();
+        runExtraction(invoice, file);
+      };
+      reader.readAsDataURL(file);
+    }
   });
 }
 
@@ -1882,9 +1906,9 @@ document.getElementById("receiptApiTestBtn").addEventListener("click", async ()=
 function openInvoiceModal(invId){
   const inv = state.invoices.find(i=>i.id===invId); if(!inv) return;
   const bodyHtml = `
-    ${inv.thumb ? `<div class="invoice-thumb" style="height:150px;background-image:url('${inv.thumb}')"></div>` : ""}
+    ${invoiceThumbHtml(inv, 150)}
     <div class="footnote">${escapeHtml(inv.filename)} · 上传于 ${fmtDateTime(inv.uploadedAt)}</div>
-    <div class="footnote" style="background:var(--warn-soft);color:var(--warn);border-radius:6px;padding:8px 10px;">${escapeHtml(inv.note||"演示环境无法读取图片内容，请核对以下字段")}</div>
+    <div class="footnote" style="background:var(--warn-soft);color:var(--warn);border-radius:6px;padding:8px 10px;">${escapeHtml(inv.note||"请核对以下字段")}</div>
     <div class="field-row">
       <div class="field"><label>供应商</label><input id="iVendor" type="text" placeholder="未识别，请手动填写" value="${escapeHtml(inv.vendor)}"></div>
       <div class="field"><label>发票日期</label><input id="iDate" type="date" value="${inv.date.slice(0,10)}"></div>

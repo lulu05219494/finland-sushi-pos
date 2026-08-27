@@ -1,9 +1,10 @@
 """
 Lumo receipt-extraction backend.
 
-Receives a photographed receipt (mainly Finnish grocery/food-service receipts:
-K-Citymarket, K-Supermarket, K-Market, S-market, Prisma, Lidl, ...), sends it to
-Gemini as a multimodal request, and returns structured JSON:
+Receives a receipt or invoice — either a photo (JPEG/PNG/WebP/HEIC) or a PDF —
+(mainly Finnish grocery/food-service receipts: K-Citymarket, K-Supermarket,
+K-Market, S-market, Prisma, Lidl, ...), sends it to Gemini as a multimodal
+request, and returns structured JSON:
 
     {
       "store_name": str | null,
@@ -34,8 +35,11 @@ load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 GOOGLE_MODEL_NAME = os.getenv("GOOGLE_MODEL_NAME", "gemini-2.5-flash")
 FRONTEND_ORIGINS = [o.strip() for o in os.getenv("FRONTEND_ORIGINS", "*").split(",") if o.strip()]
-MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
-ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"}
+MAX_UPLOAD_BYTES = 15 * 1024 * 1024  # 15 MB (scanned multi-page PDFs run larger than photos)
+ALLOWED_CONTENT_TYPES = {
+    "image/jpeg", "image/png", "image/webp", "image/heic", "image/heif",
+    "application/pdf",
+}
 
 app = FastAPI(title="Lumo Receipt Extraction API")
 
@@ -81,13 +85,14 @@ class ExtractionResponse(BaseModel):
     warning: Optional[str] = None
 
 
-PROMPT = """You are reading a photographed retail or food-service receipt (kassakuitti) \
-from Finland. It may come from chains such as K-Citymarket, K-Supermarket, K-Market, \
-K-Extra, S-market, Prisma, Lidl, Sale, Alepa, Kespro, Meira Nova, or a similar Finnish \
-supplier. Receipts are printed in Finnish and may contain umlauts (ä, ö, å) and heavily \
-abbreviated product names (e.g. "MERILOHI FILEOITUNA").
+PROMPT = """You are reading a retail or food-service receipt or invoice (kassakuitti / \
+lasku) from Finland, supplied either as a photo or as a PDF document. It may come from \
+chains such as K-Citymarket, K-Supermarket, K-Market, K-Extra, S-market, Prisma, Lidl, \
+Sale, Alepa, Kespro, Meira Nova, or a similar Finnish supplier. It is printed in Finnish \
+and may contain umlauts (ä, ö, å) and heavily abbreviated product names (e.g. "MERILOHI \
+FILEOITUNA"). A PDF may span multiple pages — read all of them.
 
-Extract exactly these fields from the image:
+Extract exactly these fields:
 
 - store_name: the store or chain name printed at the top of the receipt.
 - date: the purchase date, converted to ISO format YYYY-MM-DD. Finnish receipts \
@@ -103,8 +108,8 @@ Rules:
 - If a field cannot be read with confidence, return null for it (or an empty list for \
 items) — never guess, invent, or approximate a value that is not actually legible in \
 the image.
-- If the image is not a receipt at all, or is unreadable, return null for every field \
-and an empty items list.
+- If the file is not a receipt/invoice at all, or is unreadable, return null for every \
+field and an empty items list.
 - Respond with JSON only, matching the provided schema."""
 
 
@@ -145,14 +150,14 @@ def health():
 
 @app.post("/api/receipts/extract", response_model=ExtractionResponse)
 async def extract_receipt(file: UploadFile = File(...)):
-    image_bytes = await _read_upload(file)
+    file_bytes = await _read_upload(file)
     client = get_client()
 
     try:
         response = await client.aio.models.generate_content(
             model=GOOGLE_MODEL_NAME,
             contents=[
-                types.Part.from_bytes(data=image_bytes, mime_type=file.content_type),
+                types.Part.from_bytes(data=file_bytes, mime_type=file.content_type),
                 PROMPT,
             ],
             config=types.GenerateContentConfig(
