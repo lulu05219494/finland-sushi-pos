@@ -409,6 +409,15 @@ tbody tr:hover{background:var(--paper-sunken);}
 .bom-row{display:grid;grid-template-columns:1fr 90px 32px;gap:8px;align-items:center;}
 .bom-list{display:flex;flex-direction:column;gap:8px;}
 
+.item-row{display:grid;grid-template-columns:1fr 62px 88px 84px 32px;gap:6px;align-items:center;}
+.item-row-head{display:grid;grid-template-columns:1fr 62px 88px 84px 32px;gap:6px;
+  font-size:10.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.04em;padding:0 2px;}
+.item-row input,.item-row select{
+  border:1px solid var(--border-strong);background:var(--paper);color:var(--ink);
+  border-radius:6px;padding:6px 8px;font-size:12.5px;font-family:inherit;width:100%;
+}
+.item-row input:focus,.item-row select:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent);}
+
 .empty-state{text-align:center;padding:40px 20px;color:var(--ink-faint);}
 .empty-state svg{width:36px;height:36px;margin-bottom:10px;opacity:.6;}
 
@@ -944,21 +953,32 @@ function seedState(){
 
   const invoices = [
     {
-      id:"INV-000001", filename:"kespro_lasku_0812.jpg", thumb:null,
-      status:"approved", vendor:"Kespro Oy", item:"生鲜与干货补货", date: isoDaysAgo(5),
-      amountExcl: 214.30, vatRate:13.5, category: invoiceCategories[0], note:"",
+      id:"INV-000001", filename:"kespro_lasku_0812.jpg", thumb:null, fileType:"image",
+      status:"approved", vendor:"Kespro Oy", date: isoDaysAgo(5),
+      items:[
+        {name:"Lohifilee 6kg", qty:1, unitExcl:129.00, vat:13.5},
+        {name:"Sushiriisi 25kg", qty:1, unitExcl:85.30, vat:13.5},
+      ],
+      category: invoiceCategories[0], note:"",
       uploadedAt: isoDaysAgo(5),
     },
     {
-      id:"INV-000002", filename:"pakkaus_hankinta.jpg", thumb:null,
-      status:"approved", vendor:"Foodela Wholesale Oy", item:"外卖打包盒 / 餐具", date: isoDaysAgo(3),
-      amountExcl: 58.90, vatRate:25.5, category: invoiceCategories[1], note:"",
+      id:"INV-000002", filename:"pakkaus_hankinta.jpg", thumb:null, fileType:"image",
+      status:"approved", vendor:"Foodela Wholesale Oy", date: isoDaysAgo(3),
+      items:[
+        {name:"外卖打包盒 500个", qty:1, unitExcl:38.90, vat:25.5},
+        {name:"一次性筷子 1000双", qty:1, unitExcl:20.00, vat:25.5},
+      ],
+      category: invoiceCategories[1], note:"",
       uploadedAt: isoDaysAgo(3),
     },
     {
-      id:"INV-000003", filename:"kalatukku_kuitti.jpg", thumb:null,
-      status:"pending", vendor:"Suomen Kalatukku Oy", item:"冷冻虾仁 5kg", date: isoDaysAgo(1),
-      amountExcl: 176.40, vatRate:13.5, category: invoiceCategories[0], note:"",
+      id:"INV-000003", filename:"kalatukku_kuitti.jpg", thumb:null, fileType:"image",
+      status:"pending", vendor:"Suomen Kalatukku Oy", date: isoDaysAgo(1),
+      items:[
+        {name:"冷冻虾仁 5kg", qty:1, unitExcl:176.40, vat:13.5},
+      ],
+      category: invoiceCategories[0], note:"",
       uploadedAt: isoDaysAgo(1),
     },
   ];
@@ -1014,6 +1034,15 @@ function loadState(){
         if(!parsed.webhookLog) parsed.webhookLog = [];
         if(parsed.settings && parsed.settings.receiptApiBase===undefined) parsed.settings.receiptApiBase = "http://localhost:8000";
         if(parsed.settings && parsed.settings.receiptApiStatus===undefined) parsed.settings.receiptApiStatus = "unknown";
+        (parsed.invoices||[]).forEach(inv=>{
+          if(!Array.isArray(inv.items)){
+            inv.items = (inv.amountExcl || inv.item)
+              ? [{name: inv.item || "未分类", qty:1, unitExcl: inv.amountExcl||0, vat: inv.vatRate!=null?inv.vatRate:13.5}]
+              : [];
+          }
+          delete inv.amountExcl; delete inv.vatRate; delete inv.item;
+          if(!inv.fileType) inv.fileType = "image";
+        });
         return parsed;
       }
     }
@@ -1209,7 +1238,7 @@ function renderDashboard(){
           <div style="font-weight:700;font-size:13px;">${i.vendor ? escapeHtml(i.vendor) : '<span style="color:var(--crit);">供应商未识别</span>'}</div>
           <div class="footnote">${fmtDate(i.date)} · ${escapeHtml(i.category)}</div>
         </div>
-        <div class="num" style="font-weight:600;">${money(i.amountExcl*(1+i.vatRate/100))}</div>
+        <div class="num" style="font-weight:600;">${money(invoiceTotals(i).incl)}</div>
       </div>
     </div>`).join("") : `<p class="footnote">暂无待处理发票，TaxHacker 一切就绪。</p>`;
   document.querySelectorAll("[data-open-invoice]").forEach(el=>{
@@ -1677,6 +1706,16 @@ function receiptApiPillText(status, model){
   return "未测试";
 }
 
+function invoiceTotals(inv){
+  let excl=0, vat=0;
+  (inv.items||[]).forEach(it=>{
+    const line = (it.qty||0)*(it.unitExcl||0);
+    excl += line;
+    vat += line*((it.vat||0)/100);
+  });
+  return {excl, vat, incl: excl+vat};
+}
+
 function invoiceThumbHtml(inv, heightPx){
   if(inv.fileType==="pdf"){
     return `<div class="invoice-thumb" style="height:${heightPx}px;flex-direction:column;gap:4px;">
@@ -1705,10 +1744,10 @@ function renderInvoices(){
       ${invoiceThumbHtml(inv, 86)}
       ${inv.status==="processing" ? `<div style="display:flex;align-items:center;gap:8px;"><div class="spinner"></div><span class="footnote">解析中…</span></div>` : `
       <div class="vendor">${inv.vendor ? escapeHtml(inv.vendor) : `<span style="color:var(--crit);">供应商未识别</span>`}</div>
-      ${inv.item ? `<div class="meta" style="font-family:var(--font-body);">${escapeHtml(inv.item)}</div>` : ""}
+      ${inv.items && inv.items.length ? `<div class="meta" style="font-family:var(--font-body);">${escapeHtml(inv.items[0].name||"(未命名)")}${inv.items.length>1?" 等 "+inv.items.length+" 项商品":""}</div>` : ""}
       <div class="meta">${fmtDate(inv.date)} · ${escapeHtml(inv.category)}</div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span class="amt">${money(inv.amountExcl*(1+inv.vatRate/100))}</span>
+        <span class="amt">${money(invoiceTotals(inv).incl)}</span>
         <span class="pill ${inv.status==='approved'?'ok':(inv.status==='pending'?'warn':'crit')}">${inv.status==='approved'?'已确认':(inv.status==='pending'?'待确认':'已拒绝')}</span>
       </div>`}
     </div>`).join("");
@@ -1761,8 +1800,8 @@ function handleFiles(files){
     const id = "INV-"+String(seq).padStart(6,"0");
     const invoice = {
       id, filename:file.name, thumb:null, fileType: isPdf ? "pdf" : "image",
-      status:"processing", vendor:"", item:"", date:new Date().toISOString(),
-      amountExcl:0, vatRate:13.5, category:"", note:"",
+      status:"processing", vendor:"", items:[], date:new Date().toISOString(),
+      category:"", note:"",
       uploadedAt:new Date().toISOString(),
     };
     state.invoices.unshift(invoice);
@@ -1809,23 +1848,32 @@ async function extractReceiptViaBackend(file){
 }
 
 function applyBackendResult(invoice, result){
-  const items = Array.isArray(result.items) ? result.items : [];
-  const itemSummary = items.map(it => it.price!=null ? `${it.name}（${money(it.price)}）` : it.name).join("、");
-  const vatRate = 13.5;
-  const amountExcl = result.total_amount!=null ? Math.round((result.total_amount/(1+vatRate/100))*100)/100 : 0;
+  const rawItems = Array.isArray(result.items) ? result.items : [];
+  let items = rawItems.map(it=>{
+    const vat = it.vat_rate!=null ? it.vat_rate : 13.5;
+    const qty = (it.quantity!=null && it.quantity>0) ? it.quantity : 1;
+    const lineTotal = it.price!=null ? it.price : 0;
+    const unitExcl = qty>0 ? Math.round((lineTotal/qty/(1+vat/100))*100)/100 : 0;
+    return {name: it.name || "未命名商品", qty, unitExcl, vat};
+  });
+  if(items.length===0 && result.total_amount!=null){
+    const vat = 13.5;
+    items = [{name:"（未识别明细，合计）", qty:1, unitExcl: Math.round((result.total_amount/(1+vat/100))*100)/100, vat}];
+  } else if(items.length===0){
+    items = [{name:"", qty:1, unitExcl:0, vat:13.5}];
+  }
   const note = result.warning
     ? ("Gemini 未能确定："+result.warning+"，请核对后再确认入账")
-    : "已由 Gemini 从图片中识别，请核对后确认入账";
+    : "已由 Gemini 从图片中识别 "+items.length+" 项商品，请核对后确认入账";
   Object.assign(invoice, {
     status:"pending",
     vendor: result.store_name || "",
-    item: itemSummary,
+    items,
     date: result.date ? new Date(result.date+"T12:00:00").toISOString() : new Date().toISOString(),
-    amountExcl, vatRate,
     category: state.invoiceCategories[0],
     note,
   });
-  showToast(result.store_name ? ("Gemini 已识别："+result.store_name) : "Gemini 未能识别供应商，请核对", !result.store_name);
+  showToast(result.store_name ? ("Gemini 已识别："+result.store_name+"，共 "+items.length+" 项") : "Gemini 未能识别供应商，请核对", !result.store_name);
 }
 
 function applyFilenameFallback(invoice, file, err){
@@ -1835,17 +1883,16 @@ function applyFilenameFallback(invoice, file, err){
   if(hints.dateIso) matched.push("日期");
   if(hints.amount!=null) matched.push("金额");
   const vatRate = 13.5;
-  const amountExcl = hints.amount!=null ? Math.round((hints.amount/(1+vatRate/100))*100)/100 : 0;
+  const items = [{name:"", qty:1, unitExcl: hints.amount!=null ? Math.round((hints.amount/(1+vatRate/100))*100)/100 : 0, vat:vatRate}];
   const reason = (err && err.message) ? err.message : "无法连接识别后端";
   const note = "识别后端不可用（"+reason+"）"
     + (matched.length ? "，已从文件名解析：" + matched.join("、") : "，且未能从文件名解析到有效信息")
-    + "，请核对/手动填写后再确认入账";
+    + "，请手动补全商品明细后再确认入账";
   Object.assign(invoice, {
     status:"pending",
     vendor: hints.vendor,
-    item: "",
+    items,
     date: hints.dateIso || new Date().toISOString(),
-    amountExcl, vatRate,
     category: state.invoiceCategories[0],
     note,
   });
@@ -1911,6 +1958,20 @@ document.getElementById("receiptApiTestBtn").addEventListener("click", async ()=
 
 function openInvoiceModal(invId){
   const inv = state.invoices.find(i=>i.id===invId); if(!inv) return;
+  let itemDraft = (inv.items||[]).map(it=>({name:it.name, qty:it.qty, unitExcl:it.unitExcl, vat:it.vat}));
+  if(itemDraft.length===0) itemDraft.push({name:"", qty:1, unitExcl:0, vat:13.5});
+
+  function itemRowsHtml(){
+    return itemDraft.map((row,idx)=>`
+      <div class="item-row" data-item-idx="${idx}">
+        <input data-item-name type="text" placeholder="商品名称" value="${escapeHtml(row.name)}">
+        <input data-item-qty type="number" step="0.001" min="0" value="${row.qty}">
+        <input data-item-unit type="number" step="0.01" min="0" value="${row.unitExcl}">
+        <select data-item-vat>${state.vatRates.map(v=>`<option value="${v.rate}" ${v.rate===row.vat?"selected":""}>${v.rate}%</option>`).join("")}</select>
+        <button class="btn ghost sm" data-item-del type="button" title="移除">✕</button>
+      </div>`).join("");
+  }
+
   const bodyHtml = `
     ${invoiceThumbHtml(inv, 150)}
     <div class="footnote">${escapeHtml(inv.filename)} · 上传于 ${fmtDateTime(inv.uploadedAt)}</div>
@@ -1919,43 +1980,61 @@ function openInvoiceModal(invId){
       <div class="field"><label>供应商</label><input id="iVendor" type="text" placeholder="未识别，请手动填写" value="${escapeHtml(inv.vendor)}"></div>
       <div class="field"><label>发票日期</label><input id="iDate" type="date" value="${inv.date.slice(0,10)}"></div>
     </div>
-    <div class="field"><label>商品 / 用途说明</label><input id="iItem" type="text" placeholder="例如：三文鱼柳 2.7kg（可手动填写）" value="${escapeHtml(inv.item||"")}"></div>
-    <div class="field-row">
-      <div class="field"><label>不含税金额 (€)</label><input id="iAmount" type="number" step="0.01" min="0" value="${inv.amountExcl}"></div>
-      <div class="field"><label>VAT 税率</label>
-        <select id="iVat">${state.vatRates.map(v=>`<option value="${v.rate}" ${v.rate===inv.vatRate?"selected":""}>${v.rate}% — ${escapeHtml(v.label)}</option>`).join("")}</select>
-      </div>
-    </div>
     <div class="field"><label>费用分类</label>
       <select id="iCategory">${state.invoiceCategories.map(c=>`<option ${c===inv.category?"selected":""}>${escapeHtml(c)}</option>`).join("")}</select>
     </div>
-    <div class="field"><label>备注</label><input id="iNote" type="text" value="${escapeHtml(inv.note||"")}"></div>
+    <hr class="divider">
+    <div class="section-title"><h3 style="font-size:13px;">商品明细</h3><span class="hint">逐行编辑，不同商品可用不同税率</span></div>
+    <div class="item-row-head"><span>名称</span><span>数量</span><span>不含税单价</span><span>税率</span><span></span></div>
+    <div class="bom-list" id="invItemList">${itemRowsHtml()}</div>
+    <button class="btn ghost sm" id="addInvItemRow" type="button" style="align-self:flex-start;">+ 添加商品行</button>
     <div id="iCalc" class="footnote"></div>
+    <div class="field"><label>备注</label><input id="iNote" type="text" value="${escapeHtml(inv.note||"")}"></div>
   `;
   openModal("发票详情 · "+inv.id, bodyHtml, [
     {label:"删除", cls:"danger", onClick:()=>{
       state.invoices = state.invoices.filter(i=>i.id!==inv.id);
       saveState(); closeModal(); renderInvoices(); updateNavBadges();
     }},
-    {label:"存为草稿", cls:"ghost", onClick:()=> saveInvoiceEdits(inv, "pending", true)},
-    {label:inv.status==="approved"?"已确认":"确认入账", cls:"primary", onClick:()=> saveInvoiceEdits(inv, "approved", true)},
+    {label:"存为草稿", cls:"ghost", onClick:()=> saveInvoiceEdits(inv, "pending", true, itemDraft)},
+    {label:inv.status==="approved"?"已确认":"确认入账", cls:"primary", onClick:()=> saveInvoiceEdits(inv, "approved", true, itemDraft)},
   ]);
+
   function recalc(){
-    const amt = parseFloat(document.getElementById("iAmount").value)||0;
-    const vat = parseFloat(document.getElementById("iVat").value)||0;
-    document.getElementById("iCalc").textContent = "含税总额："+money(amt*(1+vat/100))+"（进项税额 "+money(amt*vat/100)+"）";
+    let excl=0, vat=0;
+    itemDraft.forEach(r=>{ const line=(r.qty||0)*(r.unitExcl||0); excl+=line; vat+=line*((r.vat||0)/100); });
+    document.getElementById("iCalc").textContent =
+      "共 "+itemDraft.length+" 项商品 · 不含税合计 "+money(excl)+" · 进项税额 "+money(vat)+" · 含税总额 "+money(excl+vat);
   }
-  ["iAmount","iVat"].forEach(id=> document.getElementById(id).addEventListener("input", recalc));
+  function bindItemEvents(){
+    document.querySelectorAll("[data-item-name]").forEach((el,idx)=> el.addEventListener("input", ()=>{ itemDraft[idx].name = el.value; }));
+    document.querySelectorAll("[data-item-qty]").forEach((el,idx)=> el.addEventListener("input", ()=>{ itemDraft[idx].qty = parseFloat(el.value)||0; recalc(); }));
+    document.querySelectorAll("[data-item-unit]").forEach((el,idx)=> el.addEventListener("input", ()=>{ itemDraft[idx].unitExcl = parseFloat(el.value)||0; recalc(); }));
+    document.querySelectorAll("[data-item-vat]").forEach((el,idx)=> el.addEventListener("change", ()=>{ itemDraft[idx].vat = parseFloat(el.value)||0; recalc(); }));
+    document.querySelectorAll("[data-item-del]").forEach(el=> el.addEventListener("click", ()=>{
+      const idx = parseInt(el.closest("[data-item-idx]").dataset.itemIdx,10);
+      itemDraft.splice(idx,1);
+      if(itemDraft.length===0) itemDraft.push({name:"", qty:1, unitExcl:0, vat:13.5});
+      document.getElementById("invItemList").innerHTML = itemRowsHtml();
+      bindItemEvents();
+      recalc();
+    }));
+  }
+  bindItemEvents();
+  document.getElementById("addInvItemRow").addEventListener("click", ()=>{
+    itemDraft.push({name:"", qty:1, unitExcl:0, vat:13.5});
+    document.getElementById("invItemList").innerHTML = itemRowsHtml();
+    bindItemEvents();
+    recalc();
+  });
   recalc();
 }
-function saveInvoiceEdits(inv, status, close){
+function saveInvoiceEdits(inv, status, close, items){
   inv.vendor = document.getElementById("iVendor").value.trim() || inv.vendor;
-  inv.item = document.getElementById("iItem").value.trim();
   inv.date = document.getElementById("iDate").value ? new Date(document.getElementById("iDate").value).toISOString() : inv.date;
-  inv.amountExcl = parseFloat(document.getElementById("iAmount").value)||0;
-  inv.vatRate = parseFloat(document.getElementById("iVat").value)||0;
   inv.category = document.getElementById("iCategory").value;
   inv.note = document.getElementById("iNote").value.trim();
+  inv.items = items.filter(r=>r.name.trim()).map(r=>({name:r.name.trim(), qty:r.qty||0, unitExcl:r.unitExcl||0, vat:r.vat}));
   inv.status = status;
   saveState();
   if(close) closeModal();
@@ -1976,7 +2055,7 @@ function renderReports(){
   const sales = salesInRange(range);
 
   const outputVat = sales.reduce((s,x)=>s+x.totalVat,0);
-  const inputVat = state.invoices.filter(i=>i.status==="approved").reduce((s,i)=>s+i.amountExcl*(i.vatRate/100),0);
+  const inputVat = state.invoices.filter(i=>i.status==="approved").reduce((s,i)=>s+invoiceTotals(i).vat,0);
   const net = outputVat - inputVat;
   document.getElementById("repOutputVat").textContent = money(outputVat);
   document.getElementById("repInputVat").textContent = money(inputVat);

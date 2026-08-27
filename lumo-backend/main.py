@@ -67,7 +67,9 @@ def get_client() -> genai.Client:
 
 class ReceiptItem(BaseModel):
     name: str
+    quantity: Optional[float] = None
     price: Optional[float] = None
+    vat_rate: Optional[float] = None
 
 
 class ReceiptExtraction(BaseModel):
@@ -100,9 +102,19 @@ usually print it as DD.MM.YYYY.
 - total_amount: the final amount actually paid (look for "YHTEENSÄ" / "VEROLLINEN" / \
 the card payment "Debit/Charge" line), as a plain number using "." as the decimal \
 separator. Do not include a currency symbol.
-- items: every distinct product or line item on the receipt, in the order printed. \
-For each: "name" is the printed product text verbatim (keep the original Finnish — \
-do not translate it), and "price" is that line's charged total as a plain number.
+- items: EVERY distinct product or line item on the document, in the order printed —
+this includes long wholesale/B2B order confirmations and invoices with dozens of rows;
+read the entire table, not just the first few rows. For each item:
+  - "name": the printed product text verbatim (keep the original Finnish — do not
+    translate it).
+  - "quantity": the quantity/count for that line, if printed (e.g. "kg", "Units", pack
+    count). Use null if not shown.
+  - "price": that line's final charged total (the actual price paid — if the receipt
+    shows a discount with an old price crossed out next to a new price, use the new,
+    final price, never the crossed-out one).
+  - "vat_rate": that line's VAT percentage, if printed per-line (Finnish invoices often
+    mix rates — e.g. 13.5% for food/ingredients and 25.5% for services, delivery, or
+    packaging on the same document). Use null if no per-line rate is shown.
 
 Rules:
 - If a field cannot be read with confidence, return null for it (or an empty list for \
